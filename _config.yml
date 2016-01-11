@@ -9,4 +9,4 @@ twitter_username:
 github_username:  biscoitinho
 
 # Build settings
-markdown: kramdown
+markdown: redcarpet
