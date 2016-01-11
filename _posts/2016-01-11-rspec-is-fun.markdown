@@ -64,7 +64,7 @@ in this file the whole mambo-jumbo will happen:
   4 end
 ```
 
-thats it for now, keeping thing as simple as they can be
+thats it for now, keeping things as simple as they can be
 the `require 'testing'` part tells ruby to look for file `testing.rb`
 Now it is time to fire up our tests ! `cd` to main folder of the testing app and hit:
 
