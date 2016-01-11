@@ -1,4 +1,8 @@
 ---
+layout: post
+title:  "Rspec is fun!"
+date:   2016-01-11 19:42:00
+categories: jekyll update
 ---
 
 Rspec & TDD
