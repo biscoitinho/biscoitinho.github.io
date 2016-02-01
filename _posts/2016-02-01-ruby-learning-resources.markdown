@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Ruby learning resources"
-date: 2016-01-20 18:35:00
+date: 2016-02-01 18:35:00
 categories: ruby basics
 ---
 
