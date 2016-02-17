@@ -131,3 +131,5 @@ This is it our simple basic clock with basic alarm funcionality.
 
 In upcoming posts I will try to tweak it to be more useful and nicer to
 the eyes!
+
+stay tuned.
