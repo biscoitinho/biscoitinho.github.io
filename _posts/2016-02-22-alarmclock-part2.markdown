@@ -72,6 +72,7 @@ Next part is little tricky because we are disabling timeouts.
 in the same folder as rest of the files) and with sound we got `play()` for playing it.
 If we hadn't cleared timeouts sound whould start every 1000 milisecond (we didn't
 want that ;))
+
 Now our clock is much more useful we can easily set alarm and when time comes alarm
 triggers alarm sound. Clock is still kind of ugly, we will take care of this in
 next post.
