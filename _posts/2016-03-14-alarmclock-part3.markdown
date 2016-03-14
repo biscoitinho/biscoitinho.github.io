@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "AlarmClock part 3"
-date: 2016-03-14 21:00:00
+title:  "AlarmClock part 3"
+date:   2016-03-14 21:00:00
 categories: js basics
 ---
 
