@@ -138,7 +138,7 @@ function alarmClock() {
 window.onload = alarmClock;
 ```
 
-We got rid of variables `m` and `h` and now using sorter js syntax.
+We got rid of variables `m` and `h` and now using shorter js syntax.
 The `+` sign is making the same job as `parseInt` method. With the help of
 this little guy our code is clearer and shorter - classical win-win ;)
 
