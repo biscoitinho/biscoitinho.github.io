@@ -145,4 +145,4 @@ this little guy our code is clearer and shorter - classical win-win ;)
 That wraps up AlarmClock series special thanks to Magda for awesome job with
 css styles - Thanks Magda!
 
-Next time we will dig in some basics of rails magic.
+Next time we will dig in to some basics of rails magic.
