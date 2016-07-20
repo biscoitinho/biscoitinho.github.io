@@ -1,0 +1,59 @@
+---
+layout: post
+title: "Workflow"
+date: 2016-07-20 20:00:00
+categories: os workflow
+---
+
+DISCLAIMER
+My rails project envolved into in-company thing so further development is
+in the private repo, sorry folks!
+
+Workflow
+
+> consists of an orchestrated and repeatable pattern of business activity
+> enabled by the systematic organization of resources into processes that
+> transform materials, provide services, or process information.
+> It can be depicted as a sequence of operations, declared as work of a person
+> or group,[2] an organization of staff, or one or more simple or
+> complex mechanisms.
+(via Wikipedia)
+
+In other words what tools I use and how on a daily basis as a developer?
+
+I would like to tell you that I have abandoned GUI and mouse and touchpad
+and I work only in terminal... but it would be a lie - sorry
+
+I use GUI and mouse because in some cases they are more convinent and more
+easy to use.
+
+I will focus on my machine with linux. Programs that I use most ofen:
+
+- guake terminal with oh-my-zsh
+- git
+- vim
+- tmux
+- irb / rails console
+- tmate
+- build in linux programs like grep, find
+- chrome browser
+- aliases - for every command I use ofen - alias!
+
+And that's actually it.
+Guake terminal - it improve my workflow with 100% and with oh-my-zsh and tmux combo
+it is an absolute killer!
+I use GUI and mouse but most of my work when I'm developing (90%) is in terminal.
+I can easily search for files edit them move through directories, fire up
+automatic tests, launch servers, colaborate with others with tmate, push, pull
+and most of all write code fast and efficient. I'm switching between terminal and
+browser with one push of a button.
+For dealing with databases I use GUI programs - sorry, but I have that need to
+see data in some nice form. For them is obviously use mouse too. It is quicker
+and more convinent to "click-it-out" then write query by hand every time.
+For development enviroment db I ofen use CLI, but for production and large scale
+databases GUI is a must for me.
+But only for databases, for instance I hate GUI apps for git.
+
+That is my way, it is not perfect but I'm trying to improve it bit by bit every time.
+Maybe even some day I will abandon GUI and mouse and be left only with darkness of
+my terminal.
