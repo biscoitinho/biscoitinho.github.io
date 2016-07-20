@@ -42,16 +42,19 @@ I will focus on my machine with linux. Programs that I use most ofen:
 And that's actually it.
 Guake terminal - it improve my workflow with 100% and with oh-my-zsh and tmux combo
 it is an absolute killer!
-I use GUI and mouse but most of my work when I'm developing (90%) is in terminal.
+
+  I use GUI and mouse but most of my work when I'm developing (90%) is in terminal.
 I can easily search for files edit them move through directories, fire up
 automatic tests, launch servers, colaborate with others with tmate, push, pull
 and most of all write code fast and efficient. I'm switching between terminal and
 browser with one push of a button.
-For dealing with databases I use GUI programs - sorry, but I have that need to
-see data in some nice form. For them is obviously use mouse too. It is quicker
+
+  For dealing with databases I use GUI programs - sorry, but I have that need to
+see data in some nice form. For them I obviously use mouse too. It is quicker
 and more convinent to "click-it-out" then write query by hand every time.
 For development enviroment db I ofen use CLI, but for production and large scale
 databases GUI is a must for me.
+
 But only for databases, for instance I hate GUI apps for git.
 
 That is my way, it is not perfect but I'm trying to improve it bit by bit every time.
