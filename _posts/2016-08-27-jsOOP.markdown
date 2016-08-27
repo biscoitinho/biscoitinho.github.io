@@ -1,0 +1,71 @@
+---
+layout: post
+title: "Javascript OOP"
+date: 2016-08-27 12:00:00
+categories: js
+---
+
+Javascript the OOP way!
+
+I tried to do some JS frontend stuff lately - it was awful!
+I'm not dissing here all those frameworks, it's just me, I utterly hate
+frontend stuff. But as I already was in JS so I thought why not do some
+stuff in JS but proper object oriented way.
+Inspired by
+[this](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Introduction_to_Object-Oriented_JavaScript#Object-oriented_programming)
+article at mozilla I've implemented my version of their code:
+
+```
+authorObject = {
+  firstName: "Mateusz",
+  lastName: "Grotha",
+  display: function() {
+    console.log("Script author: " + this.firstName + " " + this.lastName);
+  }
+};
+
+authorObject.display();
+
+function LanguageClass(language, style) {
+  this.language = language;
+  this.style = style;
+}
+
+var firstLanguage = new LanguageClass("Ruby", "ruby-way");
+var secondLanguage = new LanguageClass("Javascript", "oop");
+
+LanguageClass.prototype.print = function() {
+  console.log("My language is " + this.language + " with " + this.style);
+};
+
+firstLanguage.print();
+secondLanguage.print();
+
+function Logo(language, logotype){
+  LanguageClass.call(this, language);
+  this.logotype = logotype;
+}
+
+Logo.prototype = Object.create(LanguageClass.prototype);
+Logo.prototype.constructor = Logo;
+
+Logo.prototype.matchLogo = function() {
+  console.log("Logotype of " + this.language + " is " + this.logotype);
+};
+
+var rubyLogo = new Logo("Ruby", "Ruby");
+var jsLogo = new Logo("Javascript", "Yellow circle with black JS letters");
+
+rubyLogo.matchLogo();
+jsLogo.matchLogo();
+```
+
+As you propably guess I am runing this in terminal using `node scriptName.js` but you
+can also run this in your browser just embed this script in some nice html file.
+My thoughts:
+I like it a lot! I is now very similar to Ruby which is my first language so writting
+JS this way it is more natural to me, and code imho looks much cleaner then writting
+it and tossing those functions everywhere.
+Maybe JS isn't so bad after all ;)
+
+Cheers
