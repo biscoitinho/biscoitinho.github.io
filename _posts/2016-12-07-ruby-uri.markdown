@@ -1,0 +1,68 @@
+---
+layout: post
+title: "Ruby URI"
+date: 2016-12-07 17:00:00
+categories: ruby
+---
+
+Ruby URI
+
+Recently I was creating a search mechanism which was using filtered data from the URL provided
+by the user.
+I had URL like this `https://example.com/123456` and I had to grab this part `123456` and then
+check in the database if there is any record with such id.
+Sounds easy.
+First thing which comes to mind is `"https://example.com/123456".slice(20..25)`
+and Voila! we got it and now we can ask db for needed info... well not exactly.
+
+It's true code above will work fine, but only in this certain simple example.
+What if our URL whould look like this: `https://example.com/invoice/123456#?id_invoice=64714159` ?
+Things could get pretty messy pretty quickly, but there is one superhero:
+
+> URI
+
+What is uri ?
+
+>  URI is a module providing classes to handle Uniform Resource Identifiers (RFC2396) written by Akira Yamada
+
+For more information check out [ruby_docs](https://docs.ruby-lang.org/en/2.3.0/URI.html)
+
+Let's get our hands dirty with it!
+
+```
+require 'uri`
+
+uri = URI("https://example.com/invoice/123456#?id_invoice=64714159")
+uri.path.split("/invoice/")[1]
+```
+
+Now we got it right, even if there will be something after our invoice id (`123456`) we got it covered.
+So what happend here?:
+
+We have to require our module so we doing it in line no.1
+On third line we are declaring variable with our URL address inside URI wrapper.
+Output of this line in terminal will be:
+
+```
+=> #<URI::HTTPS https://example.com/invoice/6519316#?id_invoice=64714159>
+```
+
+And now we can use specific URI methods/classes on this object like
+`uri.path` on line four.
+Output of it will look like this: `"/invoice/6519316"`.
+
+Cool we are getting close we got rid of all that additional crap, but there is still something to dissect.
+
+For this we will use `split` method like so: `uri.path.split("/invoice/")` after this we will get:
+`["", "6519316"]`.
+
+So close but now we have our id in two element array. To deal with it nice and quickly there
+is one last thing to do - get array element of index 1.
+
+To do so we type: `uri.path.split("/invoice/")[1]`
+Then the grand price is shown - terminal output with `"123456"`.
+All of this in just 3 lines of code, pretty cool, eh?
+
+Now asking db for that id is nothing but a pleasure.
+
+Cheers

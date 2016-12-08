@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Introduction to Rails Service Objects"
-date: 2016-10-28 17:00:00
+date: 2016-11-21 17:00:00
 categories: ruby
 ---
 
