@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Ruby design patterns: Observer"
+title: "Ruby design patterns: Decorator"
 date: 2017-02-02 17:00:00
 categories: ruby
 ---
