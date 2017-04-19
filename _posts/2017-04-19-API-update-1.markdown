@@ -1,0 +1,47 @@
+---
+layout: post
+title: "API update #1"
+date: 2017-04-19 17:00:00
+categories: ruby
+---
+
+Made some changes in mentioned in my previous post
+[ruby-api](https://github.com/biscoitinho/ruby-api)
+
+
+commit:
+
+`add self create table when non-existent`
+
+Which add this code to `config/database.rb`:
+
+```
+unless ActiveRecord::Base.connection.data_source_exists?(:games)
+  ActiveRecord::Base.connection.create_table :games do |t|
+    t.string :name
+    t.string :genre
+  end
+end
+```
+
+Thanks to this little unless block now we don't have to make sqlite3
+database by ourselfs and then additionally make needed db table.
+Now activerecord does it automatically when it detect there is no db.
+
+and a second commit:
+
+`add rspec and basic test`
+
+Which adds rspec testing framework to the `ruby-api` and introduces first
+(very) basic test. All of the magic is in the`/spec` folder within
+`server_spec.rb` file. To make tests work I nedded to install
+`rspec` (obvious) and `rack-test` (see Gemfile).
+To make my work easier and faster I've also made a `.rspec` file in
+app root directory, thanks to it I now no longer have to write long
+rspec commands in terminal, this file does it every time for me.
+Instead of `rspec --color --format documentation` I now hit only
+`rspec` and the tests fly.
+
+Now I have to update my readme file
+
+Cheers
