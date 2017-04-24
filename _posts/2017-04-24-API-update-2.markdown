@@ -1,0 +1,125 @@
+---
+layout: post
+title: "API update #2"
+date: 2017-04-24 17:00:00
+categories: ruby
+---
+
+New stuff in
+[ruby-api](https://github.com/biscoitinho/ruby-api)
+
+
+commit:
+
+`new tests plus config of test db`
+
+This commit introduces couple of changes but all of them refer to tests
+and testing enviroment.
+
+First of all I've wrote 3 new tests:
+
+```
+ it "returns json content" do
+      get '/api/v1/games'
+      expect(last_response.content_type).to eq("application/json")
+    end
+
+    it "returns 404 error when wrong path provided" do
+      get '/games'
+      expect(last_response.status).to eq(404)
+    end
+
+    it "adds a new game" do
+      game_params = {
+          "name" => "tetris",
+          "genre" => "logical"
+      }.to_json
+
+      request_headers = {
+        "Accept" => "application/json",
+        "Content-Type" => "application/json"
+      }
+
+      post "/api/v1/game", game_params, request_headers
+
+      expect(last_response.status).to eq 201
+      expect(Game.last.name).to eq "tetris"
+    end
+```
+
+Number one it checks if the response is in json format.
+Second is also an easy one - it checks what will our API return when we provide it
+with wrong path.
+Third one is a little more tricky. We want to check if we can add a new game to the collection.
+To do that we need to perform a post action, the same as in readme file - that is:
+`curl -i -X POST -H "Content-Type: application/json" -d '{"name":"GameName", "genre":"GameGenre"}' http://localhost:4567/api/v1/game`
+So we make one with a tetris game, and with it we expect to receive a status of `201` and an added specific content (here `tetris`).
+Just as post method in the app:
+
+```
+post '/game' do
+  game = Game.new(json_params)
+  halt 422, serialize(game) unless game.save
+
+  response.headers['Location'] = "#{base_url}/api/v1/games/#{game.id}"
+  status 201
+end
+```
+
+Ok, so with that part covered let's move to configuration stuff.
+We run the tests all are green, it's great but now new problems emerge.
+First of all we make a post to our main app database, so after a cople of `rspec`'s in terminal we will end up with a bunch of
+ new `tetris` games written to our db (and one tetris game is enough) so we need to separate it.
+For clarity and readabilty test configuration have been moved to a separate file: `spec_helper.rb`
+Let's make there a new database:
+
+```
+ActiveRecord::Base.establish_connection(
+  :adapter => 'sqlite3',
+  :database =>  './db/api_test.db'
+)
+
+unless ActiveRecord::Base.connection.data_source_exists?(:games)
+  ActiveRecord::Base.connection.create_table :games do |t|
+    t.string :name
+    t.string :genre
+  end
+end
+```
+
+Here we are setting a db for tests only with a same table as our main app database.
+Fire up the test - voila! no new records added to main db, tests still green.
+We can check if tetris games were added to place we wanted to by logging into `sqlite3 db/api_test.db` and performing a simple SELECT
+command (`SELECT * from games;`). Yup, it worked tetris landed in separate db.
+We could call it a day now. Tests are working, we have a different database for them,
+but what if we had a fifty tests testing other post or edit actions ?
+Test db whould be full of garbage data. There is a solution of such a scenario check a `Gemfile` first:
+`gem 'database_cleaner', '~> 1.5.3'` a new kid on the block.
+Name of this gem is pretty self descriptive so let's move to how to set it up:
+
+```
+RSpec.configure do |config|
+  config.before(:suite) do
+    DatabaseCleaner.clean_with(:truncation)
+  end
+  config.before(:each) do
+    DatabaseCleaner.strategy = :transaction
+  end
+  config.before(:each, :js => true) do
+    DatabaseCleaner.strategy = :truncation
+  end
+  config.before(:each) do
+    DatabaseCleaner.start
+  end
+  config.after(:each) do
+    DatabaseCleaner.clean
+  end
+end
+```
+
+What it does it cleans test db after each run of test suite.
+It does garbage for us.
+I haven't mentioned a `require` methods in `server_spec.rb` and `spec_helper.rb`
+Point here is to move what we can to the `spec_helper` file and make a main file with tests as clean and readable as possible.
+
+Cheers
