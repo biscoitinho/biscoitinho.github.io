@@ -1,0 +1,80 @@
+---
+layout: post
+title: "API update #3"
+date: 2017-05-31 17:00:00
+categories: ruby
+---
+
+New stuff in
+[ruby-api](https://github.com/biscoitinho/ruby-api)
+
+
+commit:
+
+`rest of basic CRUD tests`
+
+I've wrote 2 new tests:
+
+One for edit action:
+
+```
+it "edits a game" do
+  game_params = {
+    "name" => "chess",
+    "genre" => "logical"
+  }.to_json
+
+  request_headers = {
+    "Accept" => "application/json",
+    "Content-Type" => "application/json"
+  }
+
+  patch "/api/v1/games/1", game_params, request_headers
+
+  expect(last_response.status).to eq 200
+  expect(Game.last.name).to eq "chess"
+end
+```
+
+We are here editing our "tetris" test example game and changing it to "Chess"
+We expect to get `200` status and a record with game name equal to "Chess"
+
+And second for delete action:
+
+```
+"deletes a game" do
+  request_headers = {
+    "Accept" => "application/json",
+    "Content-Type" => "application/json"
+  }
+
+  delete "/api/v1/games/1", request_headers
+  expect(last_response.status).to eq 204
+end
+```
+
+Here we are deleting our test example with id of 1 and expecting to recive a 204 status.
+
+
+Everything great but now our new tests don't want to pass, why is that?
+Because `DatabaseCleaner` added in previous commit cleans db not only before every whole test suite is started
+but also after every test so edit and delete action operates on an empty record and eventually they fail.
+Solution for this is simple - we have to reconfigure `DatabaseCleaner` setup in `spec_helper.rb`
+
+```
+config.before(:each) do
+  DatabaseCleaner.start
+end
+config.after(:each) do
+  DatabaseCleaner.clean
+end
+```
+
+I've removed this lines above, now `DatabaseCleaner` cleans db only at the begining of a brand new test suite
+(after `rspec` command) not after every test case.
+
+Additionally I found a bug/typo in `readme.md` which I've corrected (curl edit example)
+
+Tests are all green, time to play Witcher :)
+
+Cheers
