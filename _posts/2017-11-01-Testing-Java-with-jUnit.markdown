@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Testing JAva with jUnit"
+title: "Testing Java with jUnit"
 date: 2017-11-01 12:00:00
 categories: java
 ---
