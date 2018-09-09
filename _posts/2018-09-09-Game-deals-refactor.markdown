@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Finding game deals with python"
+title: "Refactoring the deals"
 date: 2018-09-09 18:35:00
 categories: python
 ---
