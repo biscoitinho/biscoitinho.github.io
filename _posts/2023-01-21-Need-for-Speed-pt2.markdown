@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "Python: Need for Speed"
-date: 2022-01-21 9:00:00
+title: "Python: Need for Speed part 2"
+date: 2023-01-21 9:00:00
 categories: python
 ---
 
