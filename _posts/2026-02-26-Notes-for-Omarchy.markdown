@@ -77,7 +77,8 @@ FileUtils.mkdir_p(FOLDER)
 selected
 ```
 
-I've used walker to be visually the same as all other TUI stuff in Omarchy, plus you can hoose which terminal or editor you are running.
+I've used walker to be visually the same as all other TUI stuff in Omarchy, plus you can choose which terminal or editor you are running.
+A bit more code then the original in bash - shout to Bread! but in Omarchy scenario it sits better imho.
 
 
 What it does?
@@ -86,6 +87,8 @@ What it does?
 Well Bread explained it better, but basically you hit a keybinding of your choosing (in my case SUPER + N) then you are
 promted to choose a name of the note, if none will be given then it will be created with current date. Next you'll need to choose the
 folder where it should be placed. Afterwards editor of your choosing will be opened and you will be ready to take notes.
+
+
 Super simple, super convinient. I use it on daily basis to track my progress or to just write somhere my thoughts and ideas.
 
 
