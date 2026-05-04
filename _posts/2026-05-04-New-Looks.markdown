@@ -1,0 +1,14 @@
+---
+layout: post
+title: "New Looks!"
+date: 2026-05-04 09:00:00
+categories: ruby
+---
+
+Hi,
+
+After 11 years I present you with the new looks of the blog, hope you like it :)
+I wanted to refresh it a bit, but also keep the minimal look and make it feel a bit terminal-like
+Got couple of ideas for new blog posts, so keep an eye out!
+
+Cheers
