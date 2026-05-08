@@ -3,6 +3,8 @@ title: Mateusz Grotha
 email: matgrotha@gmail.com
 description:
   developer, ruby, DIY, hacking, martial arts
+paginate: 10
+paginate_path: "/page:num/"
 baseurl: "" # the subpath of your site, e.g. /blog/
 url: "https://biscoitinho.github.io"
 twitter_username:
@@ -10,3 +12,5 @@ github_username:  biscoitinho
 
 # Build settings
 markdown: kramdown
+plugins:
+ - jekyll-paginate

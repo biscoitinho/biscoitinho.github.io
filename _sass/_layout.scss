@@ -2,28 +2,25 @@
  * Site header
  */
 .site-header {
+    border-top: 5px solid $grey-color-dark;
     border-bottom: 1px solid $grey-color-light;
     min-height: 56px;
+
+    // Positioning context for the mobile navigation icon
     position: relative;
-    background-color: $background-color;
 }
 
 .site-title {
-    font-size: 16px;
+    font-size: 26px;
     line-height: 56px;
-    letter-spacing: 0;
+    letter-spacing: -1px;
     margin-bottom: 0;
     float: left;
-    font-weight: 400;
 
-    .prompt-user  { color: $green-color; }
-    .prompt-at    { color: $grey-color; }
-    .prompt-host  { color: $brand-color; }
-    .prompt-sep   { color: $grey-color; }
-    .prompt-path  { color: $brand-color; }
-    .prompt-dollar { color: $green-color; }
-
-    &:hover { text-decoration: none; }
+    &,
+    &:visited {
+        color: $grey-color-dark;
+    }
 }
 
 .site-nav {
@@ -35,29 +32,23 @@
     }
 
     .page-link {
-        color: $grey-color;
-        font-size: 13px;
+        color: $text-color;
         line-height: $base-line-height;
-        transition: color 0.15s;
 
+        // Gaps between nav items, but not on the first one
         &:not(:first-child) {
             margin-left: 20px;
-        }
-
-        &:hover {
-            color: $green-color;
         }
     }
 
     @include media-query($on-palm) {
         position: absolute;
         top: 9px;
-        right: $spacing-unit / 2;
-        background-color: $code-bg;
+        right: 30px;
+        background-color: $background-color;
         border: 1px solid $grey-color-light;
-        border-radius: 3px;
+        border-radius: 5px;
         text-align: right;
-        z-index: 10;
 
         .menu-icon {
             display: block;
@@ -71,7 +62,10 @@
             > svg {
                 width: 18px;
                 height: 15px;
-                path { fill: $green-color; }
+
+                path {
+                    fill: $grey-color-dark;
+                }
             }
         }
 
@@ -87,9 +81,7 @@
 
         .page-link {
             display: block;
-            padding: 5px 12px;
-
-            &:not(:first-child) { margin-left: 0; }
+            padding: 5px 10px;
         }
     }
 }
@@ -101,35 +93,66 @@
  */
 .site-footer {
     border-top: 1px solid $grey-color-light;
-    padding: $spacing-unit / 2 0;
-    margin-top: $spacing-unit * 2;
+    padding: $spacing-unit 0;
 }
 
-.footer-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: $small-font-size;
-    color: $grey-color;
+.footer-heading {
+    font-size: 18px;
+    margin-bottom: $spacing-unit / 2;
+}
 
-    @include media-query($on-palm) {
-        flex-direction: column;
-        gap: 8px;
-        text-align: center;
+.contact-list,
+.social-media-list {
+    list-style: none;
+    margin-left: 0;
+}
+
+.footer-col-wrapper {
+    font-size: 15px;
+    color: $grey-color;
+    margin-left: -$spacing-unit / 2;
+    @extend %clearfix;
+}
+
+.footer-col {
+    float: left;
+    margin-bottom: $spacing-unit / 2;
+    padding-left: $spacing-unit / 2;
+}
+
+.footer-col-1 {
+    width: -webkit-calc(35% - (#{$spacing-unit} / 2));
+    width:         calc(35% - (#{$spacing-unit} / 2));
+}
+
+.footer-col-2 {
+    width: -webkit-calc(20% - (#{$spacing-unit} / 2));
+    width:         calc(20% - (#{$spacing-unit} / 2));
+}
+
+.footer-col-3 {
+    width: -webkit-calc(45% - (#{$spacing-unit} / 2));
+    width:         calc(45% - (#{$spacing-unit} / 2));
+}
+
+@include media-query($on-laptop) {
+    .footer-col-1,
+    .footer-col-2 {
+        width: -webkit-calc(50% - (#{$spacing-unit} / 2));
+        width:         calc(50% - (#{$spacing-unit} / 2));
+    }
+
+    .footer-col-3 {
+        width: -webkit-calc(100% - (#{$spacing-unit} / 2));
+        width:         calc(100% - (#{$spacing-unit} / 2));
     }
 }
 
-.footer-prompt {
-    .prompt-dollar { color: $green-color; }
-}
-
-.footer-links {
-    a {
-        color: $grey-color;
-        margin-left: 16px;
-
-        &:first-child { margin-left: 0; }
-        &:hover { color: $brand-color; }
+@include media-query($on-palm) {
+    .footer-col {
+        float: none;
+        width: -webkit-calc(100% - (#{$spacing-unit} / 2));
+        width:         calc(100% - (#{$spacing-unit} / 2));
     }
 }
 
@@ -140,18 +163,10 @@
  */
 .page-content {
     padding: $spacing-unit 0;
-    min-height: calc(100vh - 120px);
 }
 
 .page-heading {
-    font-size: 14px;
-    color: $grey-color;
-    margin-bottom: $spacing-unit;
-
-    &::before {
-        content: "# ";
-        color: $green-color;
-    }
+    font-size: 20px;
 }
 
 .post-list {
@@ -160,39 +175,120 @@
 
     > li {
         margin-bottom: $spacing-unit;
-        padding-bottom: $spacing-unit;
-        border-bottom: 1px solid $grey-color-light;
-
-        &:last-child {
-            border-bottom: none;
-        }
     }
 }
 
 .post-meta {
     font-size: $small-font-size;
     color: $grey-color;
-
-    &::before {
-        content: "# ";
-        color: $grey-color-light;
-    }
 }
 
 .post-link {
     display: block;
-    font-size: 18px;
-    color: $text-color;
-    margin-top: 4px;
+    font-size: 24px;
+}
 
-    &:hover {
-        color: $brand-color;
-    }
 
-    &::before {
-        content: "> ";
-        color: $green-color;
+
+/**
+ * Cookie consent banner
+ */
+.cookie-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: $background-color;
+    border-top: 1px solid $grey-color-light;
+    padding: 12px $spacing-unit;
+    z-index: 100;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.cookie-inner {
+    max-width: calc(#{$content-width} - (#{$spacing-unit} * 2));
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $spacing-unit;
+    font-size: $small-font-size;
+
+    @include media-query($on-palm) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
     }
+}
+
+.cookie-msg {
+    color: $grey-color;
+    line-height: 1.5;
+
+    .cookie-prompt { color: $brand-color; margin-right: 4px; }
+
+    a { color: $grey-color; text-decoration: underline; &:hover { color: $brand-color; } }
+}
+
+.cookie-actions {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.cookie-btn {
+    font-family: $base-font-family;
+    font-size: $small-font-size;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+
+    &.cookie-accept { color: $brand-color; &:hover { color: lighten($brand-color, 15%); } }
+    &.cookie-decline { color: $grey-color; &:hover { color: $text-color; } }
+}
+
+
+
+/**
+ * Pagination
+ */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: $spacing-unit 0;
+    padding: ($spacing-unit / 2) 0;
+    border-top: 1px solid $grey-color-light;
+    border-bottom: 1px solid $grey-color-light;
+    font-size: $small-font-size;
+}
+
+.pagination-link {
+    color: $brand-color;
+
+    &:hover { color: darken($brand-color, 10%); }
+}
+
+.pagination-disabled {
+    color: $grey-color-light;
+    cursor: default;
+}
+
+.pagination-info {
+    color: $grey-color;
+
+    &::before { content: "["; color: $grey-color-light; }
+    &::after  { content: "]"; color: $grey-color-light; }
+}
+
+.rss-subscribe {
+    font-size: $small-font-size;
+    color: $grey-color;
+    margin-top: $spacing-unit / 2;
+
+    a { color: $grey-color; &:hover { color: $brand-color; } }
 }
 
 
@@ -202,18 +298,15 @@
  */
 .post-header {
     margin-bottom: $spacing-unit;
-    padding-bottom: $spacing-unit / 2;
-    border-bottom: 1px solid $grey-color-light;
 }
 
 .post-title {
-    font-size: 28px;
-    letter-spacing: 0;
-    line-height: 1.3;
-    color: $text-color;
+    font-size: 42px;
+    letter-spacing: -1px;
+    line-height: 1;
 
     @include media-query($on-laptop) {
-        font-size: 24px;
+        font-size: 36px;
     }
 }
 
@@ -221,30 +314,26 @@
     margin-bottom: $spacing-unit;
 
     h2 {
-        font-size: 22px;
-        margin-top: $spacing-unit;
-        color: $green-color;
+        font-size: 32px;
 
-        &::before { content: "## "; color: $grey-color-light; }
-
-        @include media-query($on-laptop) { font-size: 20px; }
+        @include media-query($on-laptop) {
+            font-size: 28px;
+        }
     }
 
     h3 {
-        font-size: 18px;
-        margin-top: $spacing-unit;
-        color: $grey-color-dark;
+        font-size: 26px;
 
-        &::before { content: "### "; color: $grey-color-light; }
-
-        @include media-query($on-laptop) { font-size: 16px; }
+        @include media-query($on-laptop) {
+            font-size: 22px;
+        }
     }
 
     h4 {
-        font-size: 15px;
-        margin-top: $spacing-unit / 2;
-        color: $grey-color;
+        font-size: 20px;
 
-        @include media-query($on-laptop) { font-size: 14px; }
+        @include media-query($on-laptop) {
+            font-size: 18px;
+        }
     }
 }

@@ -1,0 +1,28 @@
+<div class="cookie-banner" id="cookieBanner">
+  <div class="cookie-inner">
+    <span class="cookie-msg">
+      <span class="cookie-prompt">$</span> cookies.sh:
+      this site uses cookies for analytics and basic functionality.
+      <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">more info</a>
+    </span>
+    <div class="cookie-actions">
+      <button class="cookie-btn cookie-accept" onclick="cookieConsent(true)">[ accept ]</button>
+      <button class="cookie-btn cookie-decline" onclick="cookieConsent(false)">[ decline ]</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    if (localStorage.getItem('cookie-consent') !== null) {
+      document.getElementById('cookieBanner').style.display = 'none';
+    }
+  })();
+
+  function cookieConsent(accepted) {
+    localStorage.setItem('cookie-consent', accepted ? 'accepted' : 'declined');
+    var banner = document.getElementById('cookieBanner');
+    banner.style.opacity = '0';
+    setTimeout(function() { banner.style.display = 'none'; }, 300);
+  }
+</script>
