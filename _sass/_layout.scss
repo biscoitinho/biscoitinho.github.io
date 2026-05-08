@@ -191,6 +191,48 @@
 
 
 /**
+ * Pagination
+ */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: $spacing-unit 0;
+    padding: ($spacing-unit / 2) 0;
+    border-top: 1px solid $grey-color-light;
+    border-bottom: 1px solid $grey-color-light;
+    font-size: $small-font-size;
+}
+
+.pagination-link {
+    color: $brand-color;
+
+    &:hover { color: darken($brand-color, 10%); }
+}
+
+.pagination-disabled {
+    color: $grey-color-light;
+    cursor: default;
+}
+
+.pagination-info {
+    color: $grey-color;
+
+    &::before { content: "["; color: $grey-color-light; }
+    &::after  { content: "]"; color: $grey-color-light; }
+}
+
+.rss-subscribe {
+    font-size: $small-font-size;
+    color: $grey-color;
+    margin-top: $spacing-unit / 2;
+
+    a { color: $grey-color; &:hover { color: $brand-color; } }
+}
+
+
+
+/**
  * Posts
  */
 .post-header {
