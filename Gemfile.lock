@@ -8,7 +8,7 @@ GEM
       connection_pool (>= 2.2.5)
       drb
       i18n (>= 1.6, < 2)
-      json
+      json (2.21.2)
       logger (>= 1.4.2)
       minitest (>= 5.1)
       securerandom (>= 0.3)
@@ -39,7 +39,7 @@ GEM
     execjs (2.8.1)
     faraday (2.14.3)
       faraday-net_http (>= 2.0, < 3.5)
-      json
+      json (2.21.2)
       logger
     faraday-net_http (3.4.4)
       net-http (~> 0.5)
