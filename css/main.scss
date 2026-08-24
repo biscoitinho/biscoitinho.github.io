@@ -10,20 +10,24 @@ $base-line-height: 1.7;
 
 $spacing-unit:     30px;
 
-$text-color:       #e6edf3;
-$background-color: #0d1117;
-$brand-color:      #58a6ff;
+// Kanagawa Wave
+$text-color:       #dcd7ba;
+$background-color: #1f1f28;
+$brand-color:      #7e9cd8;  // blue
 
-$green-color:      #3fb950;
+$green-color:      #98bb6c;  // bright green
+$yellow-color:     #e6c384;  // bright yellow
+$magenta-color:    #957fb8;  // magenta
+$cyan-color:       #7aa89f;  // bright cyan
+$red-color:        #c34043;  // red
 
-$grey-color:       #8b949e;
-$grey-color-light: #30363d;
-$grey-color-dark:  #c9d1d9;
+$grey-color:       #727169;
+$grey-color-light: #2a2a37;
+$grey-color-dark:  #c8c093;
 
-$code-bg:          #161b22;
+$code-bg:          #16161d;
 
 $content-width:    800px;
-
 $on-palm:          600px;
 $on-laptop:        800px;
 
