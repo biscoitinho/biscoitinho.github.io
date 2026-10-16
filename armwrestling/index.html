@@ -1,0 +1,1044 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ready… Go! — pixelowy armwrestling</title>
+<meta name="description" content="Pixelowy armwrestling w przeglądarce. Pixel armwrestling in your browser. PL / EN.">
+<meta name="theme-color" content="#17141d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&family=Silkscreen&family=VT323&display=swap">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+img{max-width:100%}
+</style>
+<style>
+/* Layout: one arcade cabinet column — pixel stage on top, two fighter panels under it, touch pad on phones. Single dark theme by choice. */
+:root{
+  --bg:#17141d; --panel:#211c29; --well:#141118; --ink:#efe6d6; --dim:#9d93a8; --line:#3a3245;
+  --p1:#f0a93b; --p2:#4fb7ab; --warn:#e0574a;
+  --f-display:"Pixelify Sans", "Courier New", monospace;
+  --f-ui:"Silkscreen", "Courier New", monospace;
+  --f-body:"VT323", "Courier New", monospace;
+  color-scheme:dark;
+}
+[hidden]{display:none!important}
+*,*::before,*::after{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink);margin:0}
+body{font-family:var(--f-body);font-size:20px;line-height:1.25;padding-inline:16px;padding-block:16px 32px}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(28px,6vw,44px);margin:0;letter-spacing:.02em;text-wrap:balance}
+h1 span{color:var(--p1)}
+.sub{color:var(--dim);margin:0}
+h2{font-family:var(--f-ui);font-size:13px;letter-spacing:.08em;color:var(--dim);margin:0 0 8px;font-weight:400}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--p1);outline-offset:2px}
+
+/* select */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.card{background:var(--panel);border:2px solid var(--line);padding:12px;text-align:left;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card[aria-pressed="true"]{border-color:var(--p1);box-shadow:4px 4px 0 var(--p1)}
+.card .top{display:flex;gap:10px;align-items:center}
+.card canvas{width:64px;height:64px;image-rendering:pixelated;background:var(--well);border:1px solid var(--line);flex:none}
+.card .nm{font-family:var(--f-display);font-size:24px;font-weight:700;line-height:1}
+.card .tag{font-family:var(--f-ui);font-size:11px;color:var(--p1);letter-spacing:.06em}
+.card p{margin:0;color:var(--dim);font-size:18px}
+.stats{display:grid;grid-template-columns:auto 1fr;gap:3px 8px;align-items:center;font-family:var(--f-ui);font-size:10px;color:var(--dim)}
+.sbar{height:6px;background:var(--well);position:relative}
+.sbar i{position:absolute;inset:0 auto 0 0;background:var(--ink)}
+.row2{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between}
+.seg{display:flex;border:2px solid var(--line)}
+.seg button{background:var(--panel);border:0;padding:8px 14px;font-family:var(--f-ui);font-size:12px}
+.seg button[aria-pressed="true"]{background:var(--p1);color:var(--bg)}
+.go{background:var(--p1);color:var(--bg);border:0;font-family:var(--f-display);font-weight:700;font-size:26px;padding:10px 28px;box-shadow:4px 4px 0 #8a5a14}
+.go:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #8a5a14}
+.rules{background:var(--panel);border:2px solid var(--line);padding:12px 14px;display:grid;gap:6px;max-width:70ch}
+.rules p{margin:0}
+#rulesBody{display:grid;gap:6px}
+kbd{font-family:var(--f-ui);font-size:12px;background:var(--well);border:1px solid var(--line);padding:1px 6px}
+
+/* fight */
+.stage{border:2px solid var(--line);background:var(--well)}
+#scene{display:block;width:100%;height:auto;aspect-ratio:16/9;image-rendering:pixelated}
+.hud{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.panel{background:var(--panel);border:2px solid var(--line);padding:10px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.panel.p1{--c:var(--p1);border-top:4px solid var(--p1)}
+.panel.p2{--c:var(--p2);border-top:4px solid var(--p2)}
+.ph{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.ph .nm{font-family:var(--f-display);font-weight:700;font-size:20px}
+.ph .st{font-family:var(--f-ui);font-size:11px;background:var(--well);padding:2px 6px;color:var(--c)}
+.mrow{display:grid;grid-template-columns:28px minmax(0,7.5em) 1fr;gap:8px;align-items:center}
+.mrow .k{font-family:var(--f-ui);font-size:12px;text-align:center;border:1px solid var(--line);background:var(--well);line-height:20px}
+.mrow.hit .k{background:var(--c);color:var(--bg)}
+.mrow .lb{font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p2 .mrow .k{visibility:hidden}
+.bar{height:12px;background:var(--well);border:1px solid var(--line);position:relative;overflow:hidden}
+.bar i{position:absolute;inset:0 auto 0 0;background:var(--c);width:0}
+.stam .bar i{background:var(--ink)}
+.stam.gassed .bar i{background:var(--warn)}
+.wr{font-family:var(--f-ui);font-size:10px;color:var(--dim)}
+.wr b{font-weight:400;color:var(--ink)}
+/* ----- sterowanie dotykowe ----- */
+.touch-only{display:none}
+body.touch .touch-only{display:inline}
+body.touch .kb-only{display:none}
+.hdr-r{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.pad{display:none;grid-template-columns:1fr 1fr;gap:8px;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#pad1{--c:var(--p1)}
+#pad2{--c:var(--p2);transform:rotate(180deg)}
+body.touch.fighting #pad1{display:grid}
+body.touch.fighting.pvp #pad2{display:grid}
+body.touch.fighting header,body.touch.fighting #hud,body.touch.fighting #footHelp{display:none}
+body.touch.fighting #fight{min-height:calc(100dvh - 48px)}
+body.touch.fighting #pad1{margin-top:auto}
+.pad button{position:relative;overflow:hidden;background:var(--panel);border:2px solid var(--line);border-bottom-width:5px;
+  min-height:clamp(64px,13dvh,120px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  touch-action:none;-webkit-tap-highlight-color:transparent}
+body.touch.fighting.pvp .pad button{min-height:clamp(56px,10dvh,100px)}
+.pad .fill{position:absolute;inset:0;background:var(--c);opacity:.35;transform-origin:bottom;transform:scaleY(0);pointer-events:none}
+.pad .lbl{position:relative;font-family:var(--f-display);font-weight:700;font-size:22px;line-height:1}
+.pad .hint{position:relative;font-family:var(--f-ui);font-size:10px;color:var(--dim);min-height:1em}
+.pad button:active{border-color:var(--c);transform:translateY(2px);border-bottom-width:3px}
+.pad button.dim{opacity:.45}
+.pad button.on{border-color:var(--c);background:var(--well)}
+.pad button.on .lbl{color:var(--c)}
+.pad button.warn{border-color:var(--warn);animation:blink .3s steps(2) infinite}
+.pad button.gassed .fill{background:var(--warn)}
+@media (orientation:landscape) and (max-height:560px){
+  body.touch.fighting{padding-block:8px}
+  body.touch.fighting #fight{display:grid;grid-template-columns:minmax(96px,1fr) auto minmax(96px,1fr);grid-template-rows:1fr 1fr auto;
+    gap:8px;min-height:0;height:calc(100dvh - 16px);max-width:none}
+  body.touch.fighting .stage{grid-column:2;grid-row:1 / 3;align-self:center;width:min(calc((100dvh - 80px) * 16 / 9),calc(100vw - 2 * 96px - 64px))}
+  body.touch.fighting .foot{grid-column:1 / -1;grid-row:3}
+  body.touch.fighting:not(.pvp) #pad1{display:contents}
+  body.touch.fighting:not(.pvp) #pad1 button{min-height:0;height:100%}
+  body.touch.fighting:not(.pvp) #pad1 [data-i="0"]{grid-column:1;grid-row:1}
+  body.touch.fighting:not(.pvp) #pad1 [data-i="1"]{grid-column:1;grid-row:2}
+  body.touch.fighting:not(.pvp) #pad1 [data-i="2"]{grid-column:3;grid-row:1}
+  body.touch.fighting:not(.pvp) #pad1 [data-i="3"]{grid-column:3;grid-row:2}
+  body.touch.fighting.pvp #pad1{grid-column:1;grid-row:1 / 3;margin:0}
+  body.touch.fighting.pvp #pad2{grid-column:3;grid-row:1 / 3;transform:none}
+  body.touch.fighting.pvp .pad button{min-height:0}
+  body.touch.fighting.pvp #fight{grid-template-columns:minmax(124px,1fr) auto minmax(124px,1fr)}
+  body.touch.fighting.pvp .pad{gap:6px}
+  body.touch.fighting.pvp .pad .lbl{font-size:14px}
+  body.touch.fighting.pvp .stage{width:min(calc((100dvh - 80px) * 16 / 9),calc(100vw - 2 * 124px - 64px))}
+  body.touch.fighting .pad .lbl{font-size:18px}
+}
+.foot{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;color:var(--dim)}
+.foot p{margin:0;max-width:70ch}
+.ghost{background:transparent;border:2px solid var(--line);padding:6px 12px;font-family:var(--f-ui);font-size:12px}
+@media (max-width:560px){
+  .hud{gap:8px}
+  .panel{padding:8px}
+  .mrow{grid-template-columns:22px 1fr;gap:6px}
+  .mrow .lb{display:none}
+  .ph .nm{font-size:17px}
+}
+.seg{flex-wrap:wrap}
+.seg.small button{padding:6px 10px;font-size:11px}
+.pickhead{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;margin-bottom:8px}
+.pickhead h2{margin:0}
+.card .top{position:relative}
+.card .who{margin-left:auto;align-self:flex-start;font-family:var(--f-ui);font-size:11px;color:var(--p1)}
+.card.p2sel{border-color:var(--p2)}
+.card.p2sel .who{color:var(--p2)}
+.card.p2sel[aria-pressed="true"]{border-color:var(--p1);box-shadow:4px 4px 0 var(--p1),-4px -4px 0 var(--p2)}
+.card[aria-pressed="false"].p2sel{box-shadow:4px 4px 0 var(--p2)}
+.note{margin:0;color:var(--dim);max-width:40ch;flex:1 1 220px}
+.rules b{font-weight:400;color:var(--p1)}
+.slip{font-family:var(--f-ui);font-size:10px;color:var(--warn);visibility:hidden}
+.slip.on{visibility:visible;animation:blink .3s steps(2) infinite}
+@keyframes blink{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.slip.on,.pad button.warn{animation:none}}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.ghost[aria-pressed="true"]{color:var(--dim)}
+</style>
+
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <h1>Ready… <span>Go!</span></h1>
+    <div class="hdr-r">
+      <p class="sub" id="subTitle"></p>
+      <button type="button" class="ghost" id="ctrl"></button>
+      <div class="seg small" id="lang">
+        <button type="button" data-v="pl">PL</button>
+        <button type="button" data-v="en">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <section id="select" class="wrap" style="padding:0">
+    <div>
+      <h2 id="hMode"></h2>
+      <div class="seg" id="mode">
+        <button type="button" data-v="cpu" aria-pressed="true"></button>
+        <button type="button" data-v="pvp"></button>
+        <button type="button" data-v="tour"></button>
+      </div>
+    </div>
+    <div>
+      <div class="pickhead">
+        <h2 id="pickTitle"></h2>
+        <div class="seg small" id="picker" hidden>
+          <button type="button" data-v="1" aria-pressed="true"></button>
+          <button type="button" data-v="2"></button>
+        </div>
+      </div>
+      <div class="cards" id="cards"></div>
+    </div>
+    <div class="row2">
+      <div id="diffBox">
+        <h2 id="hDiff"></h2>
+        <div class="seg" id="diff">
+          <button type="button" data-v="amator"></button>
+          <button type="button" data-v="zawodnik" aria-pressed="true"></button>
+          <button type="button" data-v="mistrz"></button>
+        </div>
+      </div>
+      <p class="note" id="modeNote"></p>
+      <button type="button" class="go" id="start"></button>
+    </div>
+    <div class="rules">
+      <h2 style="margin:0" id="hRules"></h2>
+      <div id="rulesBody"></div>
+    </div>
+  </section>
+
+  <section id="fight" class="wrap" style="padding:0" hidden>
+    <div class="pad" id="pad2" data-who="1"></div>
+    <div class="stage"><canvas id="scene" width="320" height="180"></canvas></div>
+    <div class="hud" id="hud">
+      <div class="panel p1" id="p1"></div>
+      <div class="panel p2" id="p2"></div>
+    </div>
+    <div class="pad" id="pad1" data-who="0"></div>
+    <div class="foot">
+      <p id="footHelp"></p>
+      <div class="btns">
+        <button type="button" class="ghost" id="mute" aria-pressed="false"></button>
+        <button type="button" class="ghost" id="back"></button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+"use strict";
+
+/* ---------- i18n: polski / english ---------- */
+const STR={
+pl:{
+  title:"Ready… Go! — pixelowy armwrestling",
+  sub:"Pixelowy armwrestling. Prototyp 0.5",
+  ctrlKb:"Sterowanie: klawiatura", ctrlTouch:"Sterowanie: dotyk",
+  hMode:"TRYB", modeCpu:"Pojedynek z CPU", modePvp:"2 graczy", modeTour:"Turniej",
+  pick1:"WYBIERZ ZAWODNIKA", pick2:"WYBIERZ ZAWODNIKÓW",
+  picker1:"Wybiera Gracz 1", picker2:"Wybiera Gracz 2",
+  hDiff:"POZIOM RYWALA", amator:"Amator", zawodnik:"Zawodnik", mistrz:"Mistrz",
+  start:"Do stołu",
+  noteTour:"Trzech rywali po kolei: amator, zawodnik, mistrz. Jedna porażka kończy turniej.",
+  notePvpTouch:"Dwóch graczy na jednym telefonie, każdy ze swoimi przyciskami.",
+  notePvpKb:"Gracz 1: A S D F, Gracz 2: J K L ;.",
+  notePvpTail:" Ten sam zawodnik po obu stronach też jest dozwolony.",
+  hRules:"ZASADY",
+  rules:[
+    '<b>Chwyt.</b> Przed każdym startem wybierasz chwyt<span class="kb-only">: <kbd>A</kbd> wysoki (premia do risera i back pressure), <kbd>S</kbd> środek, <kbd>D</kbd> głęboki (premia do cuppingu i side pressure)</span><span class="touch-only"> trzema przyciskami: wysoki (premia do risera i back pressure), środek, głęboki (premia do cuppingu i side pressure)</span>.',
+    '<b>Start.</b> Sędzia mówi „Ready…”, a po chwili „Go!”. <span class="kb-only">Wciśnięcie czegokolwiek</span><span class="touch-only">Dotknięcie przycisku</span> przed „Go!” to falstart.',
+    '<b>Walka.</b> <span class="kb-only">Klepiesz <kbd>A</kbd> side pressure, <kbd>S</kbd> back pressure, <kbd>D</kbd> cupping, <kbd>F</kbd> riser.</span><span class="touch-only">Klepiesz cztery duże przyciski: Side, Back, Cup i Riser. Najwygodniej dwoma kciukami. Przycisk wypełnia się razem ze swoim wskaźnikiem.</span> Wskaźniki same opadają, a każde wciśnięcie zjada kondycję. Na zerze zawodnik się „zapala”.',
+    '<b>Technika.</b> Hak bije prasę, prasa bije toproll, toproll bije hak. Kto ma więcej cuppingu i risera, wygrywa nadgarstek.',
+    '<b>Faule.</b> Sam side pressure bez back pressure zsuwa łokieć z poduszki. Dwa faule w rundzie oddają ją rywalowi.',
+    '<b>Wynik.</b> Dociśnij rękę rywala do poduszki w swoim kolorze. Walka do dwóch wygranych rund. <span class="kb-only">W trybie 2 graczy drugi gracz używa <kbd>J</kbd> <kbd>K</kbd> <kbd>L</kbd> <kbd>;</kbd>.</span><span class="touch-only">W trybie 2 graczy na jednym telefonie: trzymany pionowo, położony między graczami, każdy ma swoje przyciski od swojej strony. Trzymany poziomo: gracze siedzą obok siebie.</span>',
+  ],
+  soundOn:"Dźwięk: wł.", soundOff:"Dźwięk: wył.", back:"Zmień zawodnika",
+  stKond:"KOND", stamina:"Kondycja",
+  wrLabel:"Nadgarstek", gripLabel:"Chwyt", foulsLabel:"Faule",
+  slip:"Łokieć się zsuwa! Dodaj back pressure.",
+  wristWin:"wygrany", wristLose:"przegrany", wristEven:"równo",
+  gassed:"ZAPALONY",
+  sHook:"HAK", sToproll:"TOPROLL", sPress:"PRASA", sNone:"—",
+  gHigh:"WYSOKI", gMid:"ŚRODEK", gDeep:"GŁĘBOKI",
+  you:"Ty", p1:"G1", p2:"G2", cpu:"CPU, {0}",
+  footPvp:"G1: <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> <kbd>F</kbd> · G2: <kbd>J</kbd> <kbd>K</kbd> <kbd>L</kbd> <kbd>;</kbd> · <kbd>Spacja</kbd> dalej · <kbd>M</kbd> dźwięk · <kbd>Esc</kbd> menu",
+  footSolo:"<kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> <kbd>F</kbd> walka i wybór chwytu · <kbd>Spacja</kbd> dalej · <kbd>M</kbd> dźwięk · <kbd>Esc</kbd> menu",
+  foul:"FAUL!", foulSub:"{0}: {1} · PONOWNY CHWYT",
+  falstart:"FALSTART", elbowOff:"ŁOKIEĆ Z PODUSZKI", twoFouls:"2 FAULE: {0}",
+  pin:"PIN!", roundFor:"RUNDA DLA: {0}",
+  winsMatch:"WYGRYWA {0}!", rematch:"REWANŻ",
+  stageDone:"ETAP {0}/3 ZALICZONY", nextOpp:"NASTĘPNY RYWAL",
+  tourWin:"MISTRZ POMORZA!", newTour:"NOWY TURNIEJ",
+  win:"WYGRANA!", lose:"PRZEGRANA", tourEnd:"KONIEC TURNIEJU",
+  gripMsg:"CHWYT", gripOf:"CHWYT {0}",
+  gripSubTouch:"WYBIERZ CHWYT NA PRZYCISKACH",
+  gripSubPvp:"G1: A/S/D · G2: J/K/L  (WYSOKI / ŚRODEK / GŁĘBOKI)",
+  gripSubSolo:"A WYSOKI · S ŚRODEK · D GŁĘBOKI",
+  tapCont:"DOTKNIJ", spaceCont:"SPACJA",
+  tourStage:"TURNIEJ · ETAP {0}/3",
+  padGrip:"chwyt", padWait:"czekaj na GO",
+},
+en:{
+  title:"Ready… Go! — pixel armwrestling",
+  sub:"Pixel armwrestling. Prototype 0.5",
+  ctrlKb:"Controls: keyboard", ctrlTouch:"Controls: touch",
+  hMode:"MODE", modeCpu:"Versus CPU", modePvp:"2 players", modeTour:"Tournament",
+  pick1:"PICK YOUR FIGHTER", pick2:"PICK YOUR FIGHTERS",
+  picker1:"Player 1 picks", picker2:"Player 2 picks",
+  hDiff:"OPPONENT LEVEL", amator:"Amateur", zawodnik:"Pro", mistrz:"Champion",
+  start:"To the table",
+  noteTour:"Three opponents in a row: amateur, pro, champion. One loss ends the run.",
+  notePvpTouch:"Two players on one phone, each with their own buttons.",
+  notePvpKb:"Player 1: A S D F, Player 2: J K L ;.",
+  notePvpTail:" The same fighter on both sides is allowed too.",
+  hRules:"RULES",
+  rules:[
+    '<b>Grip.</b> Before every start you pick a grip<span class="kb-only">: <kbd>A</kbd> high (bonus to riser and back pressure), <kbd>S</kbd> mid, <kbd>D</kbd> deep (bonus to cupping and side pressure)</span><span class="touch-only"> with three buttons: high (bonus to riser and back pressure), mid, deep (bonus to cupping and side pressure)</span>.',
+    '<b>Start.</b> The ref calls “Ready…”, then “Go!”. <span class="kb-only">Pressing anything</span><span class="touch-only">Touching a button</span> before “Go!” is a false start.',
+    '<b>Fight.</b> <span class="kb-only">You tap <kbd>A</kbd> side pressure, <kbd>S</kbd> back pressure, <kbd>D</kbd> cupping, <kbd>F</kbd> riser.</span><span class="touch-only">You tap four big buttons: Side, Back, Cup and Riser. Two thumbs work best. Each button fills up along with its meter.</span> Meters drain on their own and every press eats stamina. At zero your fighter gasses out.',
+    '<b>Technique.</b> Hook beats press, press beats toproll, toproll beats hook. Whoever has more cupping and riser wins the wrist.',
+    '<b>Fouls.</b> Side pressure without back pressure slides your elbow off the pad. Two fouls in a round hand it to your opponent.',
+    '<b>Score.</b> Pin the opponent’s hand onto the pad in your colour. Match is first to two rounds. <span class="kb-only">In 2-player mode the second player uses <kbd>J</kbd> <kbd>K</kbd> <kbd>L</kbd> <kbd>;</kbd>.</span><span class="touch-only">2-player mode on one phone: held upright between the players, each one gets the buttons on their side. Held sideways: the players sit next to each other.</span>',
+  ],
+  soundOn:"Sound: on", soundOff:"Sound: off", back:"Change fighter",
+  stKond:"STAM", stamina:"Stamina",
+  wrLabel:"Wrist", gripLabel:"Grip", foulsLabel:"Fouls",
+  slip:"Elbow is slipping! Add back pressure.",
+  wristWin:"won", wristLose:"lost", wristEven:"even",
+  gassed:"GASSED",
+  sHook:"HOOK", sToproll:"TOPROLL", sPress:"PRESS", sNone:"—",
+  gHigh:"HIGH", gMid:"MID", gDeep:"DEEP",
+  you:"You", p1:"P1", p2:"P2", cpu:"CPU, {0}",
+  footPvp:"P1: <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> <kbd>F</kbd> · P2: <kbd>J</kbd> <kbd>K</kbd> <kbd>L</kbd> <kbd>;</kbd> · <kbd>Space</kbd> continue · <kbd>M</kbd> sound · <kbd>Esc</kbd> menu",
+  footSolo:"<kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> <kbd>F</kbd> fight and grip choice · <kbd>Space</kbd> continue · <kbd>M</kbd> sound · <kbd>Esc</kbd> menu",
+  foul:"FOUL!", foulSub:"{0}: {1} · RE-GRIP",
+  falstart:"FALSE START", elbowOff:"ELBOW OFF THE PAD", twoFouls:"2 FOULS: {0}",
+  pin:"PIN!", roundFor:"ROUND TO: {0}",
+  winsMatch:"{0} WINS!", rematch:"REMATCH",
+  stageDone:"STAGE {0}/3 CLEARED", nextOpp:"NEXT OPPONENT",
+  tourWin:"CHAMPION OF POMERANIA!", newTour:"NEW TOURNAMENT",
+  win:"YOU WIN!", lose:"YOU LOSE", tourEnd:"RUN OVER",
+  gripMsg:"GRIP", gripOf:"GRIP {0}",
+  gripSubTouch:"PICK YOUR GRIP ON THE BUTTONS",
+  gripSubPvp:"P1: A/S/D · P2: J/K/L  (HIGH / MID / DEEP)",
+  gripSubSolo:"A HIGH · S MID · D DEEP",
+  tapCont:"TAP", spaceCont:"SPACE",
+  tourStage:"TOURNAMENT · STAGE {0}/3",
+  padGrip:"grip", padWait:"wait for GO",
+},
+};
+let lang="pl";
+(function pickLang(){
+  let l="";
+  try{l=new URLSearchParams(location.search).get("lang")||"";}catch(e){}
+  if(!STR[l]){try{l=localStorage.getItem("rg-lang")||"";}catch(e){}}
+  if(!STR[l])l=(navigator.language||"en").toLowerCase().startsWith("pl")?"pl":"en";
+  lang=l;
+})();
+function tr(k,...a){
+  let v=STR[lang][k];if(v==null)v=STR.pl[k];if(v==null)return k;
+  return String(v).replace(/\{(\d)\}/g,(m,i)=>a[i]!=null?a[i]:m);
+}
+const loc=o=>(o&&o[lang]!=null?o[lang]:o&&o.pl);
+const METERS=[
+  {k:"side",name:"Side pressure"},
+  {k:"back",name:"Back pressure"},
+  {k:"cup",name:"Cupping"},
+  {k:"riser",name:"Riser"},
+];
+const KEYMAP=[["a","s","d","f"],["j","k","l",";"]]; // gracz 1, gracz 2
+const STYLE_K={hook:"sHook",toproll:"sToproll",press:"sPress",none:"sNone"};
+const styleName=k=>tr(STYLE_K[k]||"sNone");
+const BEATS={toproll:"hook",hook:"press",press:"toproll"};   // klucz bije wartość
+const COUNTER={hook:"toproll",press:"hook",toproll:"press"}; // co kontruje dany styl
+const PLANS={
+  hook:["cup","side","cup","side","back"],
+  toproll:["riser","back","riser","back","cup"],
+  press:["side","side","back","back","riser"],
+};
+const GRIPS={
+  high:{bonus:{riser:1.12,back:1.12}},
+  mid:{bonus:{}},
+  deep:{bonus:{cup:1.12,side:1.12}},
+};
+const GRIP_K={high:"gHigh",mid:"gMid",deep:"gDeep"};
+const gripName=k=>tr(GRIP_K[k]);
+const GRIP_ORDER=["high","mid","deep"];
+const PLAN_GRIP={toproll:"high",press:"mid",hook:"deep"};
+const DIFF={
+  amator:{rate:6,counter:.15,smart:.25,falstart:.12},
+  zawodnik:{rate:8.5,counter:.5,smart:.65,falstart:.05},
+  mistrz:{rate:11,counter:.85,smart:1,falstart:0},
+};
+const OUT="#120f16";
+const FIGHTERS=[
+  {name:"Heniek",tag:{pl:"HAKOWIEC",en:"HOOK"},
+   desc:{pl:"Głęboki hak. Mocny cupping i side pressure, słabszy riser.",
+         en:"Deep hook. Strong cupping and side pressure, weaker riser."},
+   stats:{side:1.15,back:.9,cup:1.25,riser:.85},stamina:1,pref:"hook",
+   look:{shirt:"#b8483c",shirtDk:"#7e2c25",skin:"#e2a67b",skinDk:"#b07850",hair:"#3b2a1f",hs:"short",build:1}},
+  {name:"Tadek",tag:{pl:"TOPROLLER",en:"TOPROLL"},
+   desc:{pl:"Szybki riser i back pressure. Idzie w palce, unika siłowania z boku.",
+         en:"Fast riser and back pressure. Goes for the fingers, avoids a side battle."},
+   stats:{side:.85,back:1.2,cup:.9,riser:1.3},stamina:.95,pref:"toproll",
+   look:{shirt:"#3f6fae",shirtDk:"#284a78",skin:"#d99b6c",skinDk:"#a66d45",hair:"#d8b04e",hs:"spiky",build:.9}},
+  {name:"Bogdan",tag:{pl:"PRASA",en:"PRESS"},
+   desc:{pl:"Ogromny side pressure i kondycja. Nadgarstek przeciętny.",
+         en:"Huge side pressure and stamina. Average wrist."},
+   stats:{side:1.35,back:1,cup:.85,riser:.8},stamina:1.15,pref:"press",
+   look:{shirt:"#4b4a55",shirtDk:"#2f2e37",skin:"#c88a5c",skinDk:"#93603a",hair:null,hs:"bald",beard:"#5a3a24",build:1.2}},
+  {name:"Wiktor",tag:{pl:"WSZECHSTRONNY",en:"ALL-ROUNDER"},
+   desc:{pl:"Bez słabych i bez wybitnych punktów. Zmienia technikę w trakcie.",
+         en:"No weak spots and no outstanding ones. Switches technique mid-match."},
+   stats:{side:1.05,back:1.05,cup:1.05,riser:1.05},stamina:1.05,pref:null,
+   look:{shirt:"#4d8a52",shirtDk:"#305b35",skin:"#ebb68b",skinDk:"#b9835a",hair:"#6e3d22",hs:"quiff",build:1}},
+];
+
+const $=s=>document.querySelector(s);
+const $$=s=>document.querySelectorAll(s);
+let sel={p:0,p2:1,diff:"zawodnik",mode:"cpu",picker:1};
+let G=null;
+
+/* ---------- pixel helpers ---------- */
+function px(g,x,y,w,h,c){g.fillStyle=c;g.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}
+function disc(g,cx,cy,r,c){g.fillStyle=c;for(let dy=-r;dy<=r;dy++){const w=Math.round(Math.sqrt(r*r-dy*dy));g.fillRect(Math.round(cx-w),Math.round(cy+dy),w*2+1,1);}}
+function brush(g,x0,y0,x1,y1,r,c){g.fillStyle=c;const n=Math.max(1,Math.ceil(Math.hypot(x1-x0,y1-y0)));for(let i=0;i<=n;i++){const t=i/n;const x=Math.round(x0+(x1-x0)*t),y=Math.round(y0+(y1-y0)*t);g.fillRect(x-r,y-r,r*2+1,r*2+1);}}
+function limb(g,x0,y0,x1,y1,r,c){brush(g,x0,y0,x1,y1,r+1,OUT);brush(g,x0,y0,x1,y1,r,c);}
+function ptext(g,str,x,y,size,col,font,align){g.font=`${size}px ${font||'"Pixelify Sans"'}`;g.textAlign=align||"center";g.textBaseline="middle";g.fillStyle=OUT;for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1],[1,1]])g.fillText(str,x+dx,y+dy);g.fillStyle=col;g.fillText(str,x,y);}
+
+/* ---------- postacie ---------- */
+function hexRgb(c){const n=parseInt(c.slice(1),16);return [n>>16&255,n>>8&255,n&255];}
+function mix(c,t,f){const a=hexRgb(c),b=hexRgb(t);return "#"+a.map((v,i)=>Math.round(v+(b[i]-v)*f).toString(16).padStart(2,"0")).join("");}
+const lite=(c,f=.25)=>mix(c,"#ffffff",f),dark=(c,f=.3)=>mix(c,"#000000",f);
+function rows(g,cx,cy,r,from,to,c){g.fillStyle=c;for(let dy=Math.max(-r,from);dy<=Math.min(r,to);dy++){const w=Math.round(Math.sqrt(r*r-dy*dy));g.fillRect(cx-w,cy+dy,w*2+1,1);}}
+
+// głowa: front=true twarzą do kamery, false = tył głowy
+function drawFace(g,L,cx,cy,front,strain){
+  const hc=L.hair,hs=L.hs;
+  px(g,cx-12,cy-1,4,5,OUT);px(g,cx-11,cy,2,3,L.skin);
+  px(g,cx+9,cy-1,4,5,OUT);px(g,cx+10,cy,2,3,L.skinDk);
+  if(hs==="spiky")for(const[i,h]of[[-6,2],[-3,4],[1,3],[4,4],[7,1]]){px(g,cx+i-1,cy-9-h,3,h+2,OUT);px(g,cx+i,cy-8-h,1,h+1,hc);}
+  if(hs==="quiff"){disc(g,cx-3,cy-9,5,OUT);disc(g,cx-3,cy-9,4,hc);}
+  disc(g,cx,cy,10,OUT);disc(g,cx,cy,9,L.skinDk);disc(g,cx-1,cy-1,8,L.skin);
+  if(hc){
+    const capTo=front?-5:3;
+    rows(g,cx,cy,9,-9,capTo,dark(hc,.2));rows(g,cx-1,cy-1,8,-8,capTo-1,hc);
+    if(front){px(g,cx-9,cy-4,2,4,hc);px(g,cx+8,cy-4,2,4,dark(hc,.2));}
+    if(hs==="quiff")px(g,cx-5,cy-12,3,1,lite(hc,.35));
+    else px(g,cx-4,cy-8,3,1,lite(hc,.3));
+  }else px(g,cx-5,cy-7,4,2,lite(L.skin,.4));
+  if(!front)return;
+  if(L.beard){rows(g,cx,cy,9,4,9,dark(L.beard,.15));rows(g,cx-1,cy,8,4,8,L.beard);px(g,cx-4,cy+3,7,1,L.beard);}
+  const brow=hc||L.beard||dark(L.skin,.5);
+  px(g,cx-6,cy,4,2,"#f2ead8");px(g,cx+1,cy,4,2,"#f2ead8");
+  px(g,cx-6,cy+1,2,1,OUT);px(g,cx+1,cy+1,2,1,OUT);
+  if(strain){px(g,cx-7,cy-3,2,1,brow);px(g,cx-5,cy-2,3,1,brow);px(g,cx+3,cy-3,2,1,brow);px(g,cx+1,cy-2,2,1,brow);}
+  else{px(g,cx-7,cy-2,5,1,brow);px(g,cx+1,cy-2,5,1,brow);}
+  px(g,cx-1,cy+2,2,2,L.skinDk);
+  if(strain){px(g,cx-4,cy+5,7,3,OUT);px(g,cx-3,cy+5,5,1,"#f2ead8");px(g,cx-3,cy+7,5,1,"#f2ead8");}
+  else px(g,cx-3,cy+6,5,1,dark(L.skin,.5));
+}
+
+// kończyna z cieniowaniem i mięśniami: bulges = [[t, r], ...]
+function arm(g,a,b,r0,r1,bulges,L){
+  const p=P(...a),q=P(...b),n=Math.max(1,Math.ceil(Math.hypot(q[0]-p[0],q[1]-p[1])));
+  const pts=[];
+  for(let i=0;i<=n;i++){const t=i/n;pts.push([p[0]+(q[0]-p[0])*t,p[1]+(q[1]-p[1])*t,Math.round(r0+(r1-r0)*t)]);}
+  for(const[t,r]of bulges)pts.push([p[0]+(q[0]-p[0])*t,p[1]+(q[1]-p[1])*t,Math.round(r)]);
+  for(const[x,y,r]of pts)disc(g,x,y,r+1,OUT);
+  for(const[x,y,r]of pts)disc(g,x,y,r,L.skinDk);
+  for(const[x,y,r]of pts)if(r>1)disc(g,x-1,y-1,r-1,L.skin);
+  for(const[x,y,r]of pts)if(r>3)disc(g,x-2,y-2,1,lite(L.skin,.25));
+}
+
+function drawPortrait(cv,f){
+  const g=cv.getContext("2d");g.imageSmoothingEnabled=false;
+  px(g,0,0,48,48,"#141118");
+  const L=f.look,w=Math.round(13*L.build);
+  disc(g,24-w,41,6,OUT);disc(g,24+w,41,6,OUT);disc(g,24-w,41,5,L.skin);disc(g,24+w,41,5,L.skinDk);
+  px(g,24-w+2,36,2*w-3,13,OUT);px(g,24-w+3,37,2*w-5,12,L.shirt);px(g,24+w-6,37,4,12,L.shirtDk);
+  px(g,20,30,9,6,L.skinDk);px(g,20,30,6,6,L.skin);
+  drawFace(g,L,24,22,true,false);
+}
+
+/* ---------- ekran wyboru ---------- */
+function setPressed(group,val){$$(group+" button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===String(val)?"true":"false"));}
+function refreshSelect(){
+  setPressed("#mode",sel.mode);setPressed("#diff",sel.diff);setPressed("#picker",sel.picker);
+  const pvp=sel.mode==="pvp";
+  $("#picker").hidden=!pvp;
+  $("#diffBox").hidden=sel.mode!=="cpu";
+  $("#pickTitle").textContent=pvp?tr("pick2"):tr("pick1");
+  $("#modeNote").textContent=sel.mode==="tour"?tr("noteTour"):
+    pvp?(isTouch()?tr("notePvpTouch"):tr("notePvpKb"))+tr("notePvpTail"):"";
+  $$(".card").forEach((c,i)=>{
+    c.setAttribute("aria-pressed",i===sel.p?"true":"false");
+    c.classList.toggle("p2sel",pvp&&i===sel.p2);
+    const w=c.querySelector(".who");
+    w.textContent=pvp?[i===sel.p?tr("p1"):"",i===sel.p2?tr("p2"):""].filter(Boolean).join(" · "):"";
+  });
+}
+function buildCards(){
+  const wrap=$("#cards");wrap.innerHTML="";
+  FIGHTERS.forEach((f,i)=>{
+    const b=document.createElement("button");b.type="button";b.className="card";b.id="pick-"+i;
+    const rows=[["SP",f.stats.side],["BP",f.stats.back],["CUP",f.stats.cup],["RIS",f.stats.riser],[tr("stKond"),f.stamina]]
+      .map(([l,v])=>`<span>${l}</span><span class="sbar"><i style="width:${Math.round((v-.6)/.8*100)}%"></i></span>`).join("");
+    b.innerHTML=`<div class="top"><canvas width="48" height="48"></canvas><div><div class="nm">${f.name}</div><div class="tag">${loc(f.tag)}</div></div><span class="who"></span></div><p>${loc(f.desc)}</p><div class="stats">${rows}</div>`;
+    drawPortrait(b.querySelector("canvas"),f);
+    b.addEventListener("click",()=>{if(sel.mode==="pvp"&&sel.picker===2)sel.p2=i;else sel.p=i;refreshSelect();});
+    wrap.appendChild(b);
+  });
+}
+function buildSelect(){
+  for(const[id,key]of[["#mode","mode"],["#diff","diff"],["#picker","picker"]])
+    $$(id+" button").forEach(b=>b.addEventListener("click",()=>{sel[key]=key==="picker"?+b.dataset.v:b.dataset.v;refreshSelect();}));
+  $$("#lang button").forEach(b=>b.addEventListener("click",()=>applyLang(b.dataset.v,true)));
+  $("#start").addEventListener("click",()=>{ensureAudio();newGame();});
+  $("#back").addEventListener("click",toSelect);
+  $("#mute").addEventListener("click",toggleMute);
+  applyLang();
+}
+// przerysowuje cały statyczny tekst po zmianie języka
+function applyLang(l,save){
+  if(l&&STR[l]){lang=l;if(save)try{localStorage.setItem("rg-lang",l);}catch(e){}}
+  document.documentElement.lang=lang;
+  document.title=tr("title");
+  setPressed("#lang",lang);
+  $("#subTitle").textContent=tr("sub");
+  $("#ctrl").textContent=touchMode?tr("ctrlTouch"):tr("ctrlKb");
+  $("#hMode").textContent=tr("hMode");
+  $("#hDiff").textContent=tr("hDiff");
+  $("#hRules").textContent=tr("hRules");
+  $("#rulesBody").innerHTML=STR[lang].rules.map(p=>`<p>${p}</p>`).join("");
+  $("#start").textContent=tr("start");
+  $("#back").textContent=tr("back");
+  $("#mute").textContent=muted?tr("soundOff"):tr("soundOn");
+  $("#mute").setAttribute("aria-pressed",muted?"true":"false");
+  for(const[sel2,keys]of[["#mode",["modeCpu","modePvp","modeTour"]],
+                         ["#diff",["amator","zawodnik","mistrz"]],
+                         ["#picker",["picker1","picker2"]]])
+    $$(sel2+" button").forEach((b,i)=>b.textContent=tr(keys[i]));
+  buildCards();
+  buildPanels();
+  PADS.forEach(p=>p.cache=[]);
+  if(G)setupHud();
+  refreshSelect();
+}
+
+/* ---------- HUD ---------- */
+function panelHTML(){
+  return `<div class="ph"><span class="nm"></span><span class="st">—</span></div>
+  <div class="mrow stam"><span class="k">⚡</span><span class="lb">${tr("stamina")}</span><span class="bar"><i></i></span></div>
+  ${METERS.map(m=>`<div class="mrow" data-m="${m.k}"><span class="k"></span><span class="lb">${m.name}</span><span class="bar"><i></i></span></div>`).join("")}
+  <div class="wr">${tr("wrLabel")}: <b class="w">${tr("wristEven")}</b> · ${tr("gripLabel")}: <b class="g">—</b> · ${tr("foulsLabel")}: <b class="f">0</b></div>
+  <div class="slip">${tr("slip")}</div>`;
+}
+function panel(sel){
+  const el=$(sel);el.innerHTML=panelHTML();
+  return {el,name:el.querySelector(".nm"),style:el.querySelector(".st"),stamRow:el.querySelector(".stam"),stam:el.querySelector(".stam i"),
+    wrist:el.querySelector(".wr .w"),grip:el.querySelector(".wr .g"),fouls:el.querySelector(".wr .f"),slip:el.querySelector(".slip"),
+    rows:Object.fromEntries(METERS.map(m=>[m.k,el.querySelector(`[data-m="${m.k}"]`)])),
+    bars:Object.fromEntries(METERS.map(m=>[m.k,el.querySelector(`[data-m="${m.k}"] i`)])),
+    keys:METERS.map(m=>el.querySelector(`[data-m="${m.k}"] .k`))};
+}
+let UI=[];
+function buildPanels(){UI=[panel("#p1"),panel("#p2")];}
+const WRIST_K={win:"wristWin",lose:"wristLose",even:"wristEven"};
+function hud(){
+  G.F.forEach((fs,i)=>{
+    const u=UI[i];
+    for(const m of METERS){u.bars[m.k].style.width=(fs.m[m.k]*100).toFixed(1)+"%";u.rows[m.k].classList.toggle("hit",fs.flash[m.k]>0);}
+    u.stam.style.width=(fs.stam*100).toFixed(1)+"%";u.stamRow.classList.toggle("gassed",fs.gassed>0);
+    u.style.textContent=fs.gassed>0?tr("gassed"):styleName(fs.style);
+    u.wrist.textContent=tr(WRIST_K[fs.wrist]);
+    u.grip.textContent=fs.gripChosen||G.phase!=="grip"?gripName(fs.grip):"…";
+    u.fouls.textContent=G.fouls[i];
+    u.slip.classList.toggle("on",fs.slip>.35&&G.phase==="fight");
+  });
+  if(isTouch())updatePads();
+}
+
+/* ---------- przyciski dotykowe ---------- */
+const PADS=[$("#pad1"),$("#pad2")].map((el,who)=>{
+  el.innerHTML=METERS.map((m,i)=>`<button type="button" data-key="${KEYMAP[who][i]}" data-i="${i}"><i class="fill"></i><span class="lbl">${m.name.split(" ")[0]}</span><span class="hint"></span></button>`).join("");
+  const btns=[...el.querySelectorAll("button")];
+  btns.forEach(b=>b.addEventListener("pointerdown",e=>{
+    e.preventDefault();ensureAudio();
+    if(e.pointerType==="touch")setTouch(true);
+    if(G&&G.phase==="match"){afterMatch();return;}
+    handleKey(b.dataset.key);
+  }));
+  el.addEventListener("contextmenu",e=>e.preventDefault());
+  return {el,btns,fills:btns.map(b=>b.querySelector(".fill")),lbls:btns.map(b=>b.querySelector(".lbl")),hints:btns.map(b=>b.querySelector(".hint")),cache:[]};
+});
+const PAD_NAMES=["Side","Back","Cup","Riser"];
+function setTxt(p,i,lbl,hint,cls){
+  const key=lbl+"|"+hint+"|"+cls;if(p.cache[i]===key)return;p.cache[i]=key;
+  p.lbls[i].textContent=lbl;p.hints[i].textContent=hint;p.btns[i].className=cls;
+}
+function updatePads(){
+  PADS.forEach((p,who)=>{
+    const fs=G.F[who],ph=G.phase;
+    for(let i=0;i<4;i++){
+      let lbl=PAD_NAMES[i],hint="",cls="",fill=0;
+      if(ph==="grip"){
+        if(i<3){lbl=gripName(GRIP_ORDER[i]);hint=tr("padGrip");cls=fs.gripChosen?(fs.grip===GRIP_ORDER[i]?"on":"dim"):"";}
+        else{lbl="";cls="dim";}
+      }else if(ph==="ready"){hint=tr("padWait");cls="dim";}
+      else if(ph==="fight"){
+        fill=fs.m[METERS[i].k];
+        if(i===1&&fs.slip>.35)cls="warn";
+        if(fs.gassed>0)cls+=" gassed";
+      }else if(ph==="match"){lbl=i===0?G.next():"";cls=G.timer<.8?"dim":"";}
+      else cls="dim";
+      setTxt(p,i,lbl,hint,cls);
+      p.fills[i].style.transform=`scaleY(${fill.toFixed(3)})`;
+    }
+  });
+}
+function buzz(p){try{if(isTouch()&&!muted&&navigator.vibrate)navigator.vibrate(p);}catch(e){}}
+function setupHud(){
+  const pvp=G.mode==="pvp";
+  document.body.classList.add("fighting");document.body.classList.toggle("pvp",pvp);
+  UI.forEach((u,i)=>{
+    const show=i===0||pvp;
+    u.keys.forEach((k,j)=>{k.textContent=show?KEYMAP[i][j].toUpperCase():"";k.style.visibility=show?"visible":"hidden";});
+  });
+  UI[0].name.textContent=`${G.F[0].def.name} (${pvp?tr("p1"):tr("you")})`;
+  UI[1].name.textContent=`${G.F[1].def.name} (${pvp?tr("p2"):tr("cpu",tr(G.diffKey))})`;
+  $("#footHelp").innerHTML=pvp?tr("footPvp"):tr("footSolo");
+}
+
+/* ---------- dźwięk (Web Audio, bez plików) ---------- */
+let AC=null,NOISE=null,muted=false;
+try{muted=localStorage.getItem("rg-muted")==="1";}catch(e){}
+function ensureAudio(){
+  if(AC){if(AC.state==="suspended")AC.resume();return;}
+  try{
+    AC=new (window.AudioContext||window.webkitAudioContext)();
+    NOISE=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);
+    const d=NOISE.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+  }catch(e){AC=null;}
+}
+function toggleMute(){
+  muted=!muted;try{localStorage.setItem("rg-muted",muted?"1":"0");}catch(e){}
+  $("#mute").textContent=muted?tr("soundOff"):tr("soundOn");$("#mute").setAttribute("aria-pressed",muted?"true":"false");
+  if(muted)try{speechSynthesis.cancel();}catch(e){}
+}
+function tone(freq,dur,type,gain,slideTo,delay=0){
+  if(!AC||muted)return;
+  const t=AC.currentTime+delay,o=AC.createOscillator(),g=AC.createGain();
+  o.type=type;o.frequency.setValueAtTime(freq,t);if(slideTo)o.frequency.exponentialRampToValueAtTime(slideTo,t+dur);
+  g.gain.setValueAtTime(gain,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(g).connect(AC.destination);o.start(t);o.stop(t+dur+.02);
+}
+function noise(dur,gain,freq,q,attack=.005){
+  if(!AC||muted)return;
+  const t=AC.currentTime,s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();
+  s.buffer=NOISE;s.loop=true;f.type="bandpass";f.frequency.value=freq;f.Q.value=q;
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(gain,t+attack);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  s.connect(f).connect(g).connect(AC.destination);s.start(t);s.stop(t+dur+.05);
+}
+function speak(text){
+  if(muted)return;
+  try{const u=new SpeechSynthesisUtterance(text);u.lang="en-US";u.rate=1.05;u.pitch=.8;speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}
+}
+const SFX={
+  tap(i,who,cpu){tone((who?190:240)*[1,1.19,1.5,1.78][i],.04,"square",cpu?.012:.03);},
+  grip(){noise(.12,.25,900,1.2);},
+  ready(){speak("Ready");tone(330,.12,"triangle",.12);},
+  go(){speak("Go!");tone(660,.25,"square",.08);tone(990,.18,"square",.05,null,.06);},
+  whistle(){for(let i=0;i<3;i++)tone(2600+i*40,.16,"square",.035,null,i*.18);noise(.5,.08,2800,8);},
+  thud(){tone(140,.35,"sine",.5,40);noise(.18,.35,300,1);},
+  cheer(){noise(1.6,.18,1200,.6,.4);noise(1.4,.12,2400,.8,.3);},
+  gassed(){tone(90,.35,"sawtooth",.05,60);},
+};
+
+/* ---------- logika gry ---------- */
+function newFS(def){return {def,m:{side:0,back:0,cup:0,riser:0},stam:1,gassed:0,style:"none",wrist:"even",
+  flash:{side:0,back:0,cup:0,riser:0},force:0,slip:0,grip:"mid",gripChosen:false};}
+function newGame(){
+  const pd=FIGHTERS[sel.p];
+  if(sel.mode==="pvp"){beginMatch(pd,FIGHTERS[sel.p2],"zawodnik",null);return;}
+  if(sel.mode==="tour"){
+    const opps=FIGHTERS.filter(f=>f!==pd).sort(()=>Math.random()-.5);
+    beginMatch(pd,opps[0],"amator",{stage:0,opps});return;
+  }
+  const others=FIGHTERS.filter(f=>f!==pd);
+  beginMatch(pd,others[Math.floor(Math.random()*others.length)],sel.diff,null);
+}
+function beginMatch(pd,od,diffKey,tour){
+  G={mode:sel.mode,F:[newFS(pd),newFS(od)],diffKey,diff:DIFF[diffKey],tour,
+     ai:sel.mode==="pvp"?null:{acc:0,plan:"hook",replan:0,throttle:false,roll:0,off:Math.random()*6},
+     phase:"grip",timer:0,pos:0,score:[0,0],fouls:[0,0],round:1,goT:0,msg:null,sub:null,msgCol:"#efe6d6",
+     shake:false,readyDur:1.2,cpuFalse:-1};
+  setupHud();
+  $("#select").hidden=true;$("#fight").hidden=false;
+  try{scrollTo(0,0);}catch(e){}
+  startRound();
+}
+function toSelect(){G=null;document.body.classList.remove("fighting","pvp");$("#fight").hidden=true;$("#select").hidden=false;try{speechSynthesis.cancel();}catch(e){}}
+function startRound(){G.fouls=[0,0];regrip();}
+function regrip(){
+  G.pos=0;G.F=G.F.map(fs=>newFS(fs.def));G.phase="grip";G.timer=0;G.msg=null;G.sub=null;G.shake=false;
+  if(G.ai){G.ai.acc=0;aiReplan();}
+}
+function chooseGrip(who,idx){
+  const fs=G.F[who];if(fs.gripChosen)return;
+  fs.grip=GRIP_ORDER[idx];fs.gripChosen=true;SFX.grip();
+}
+function toReady(){
+  for(const fs of G.F)fs.gripChosen=true;
+  G.phase="ready";G.timer=0;G.readyDur=.9+Math.random()*1.3;
+  G.cpuFalse=G.ai&&Math.random()<G.diff.falstart?Math.random()*G.readyDur*.9:-1;
+  SFX.ready();
+}
+function foul(who,why){
+  if(!G||(G.phase!=="ready"&&G.phase!=="fight"))return;
+  G.fouls[who]++;SFX.whistle();buzz(120);G.timer=0;G.shake=false;
+  const name=G.F[who].def.name;
+  if(G.fouls[who]>=2){winRound(1-who,()=>tr("twoFouls",name));return;}
+  G.phase="foul";G.msg=()=>tr("foul");G.msgCol="#e0574a";G.sub=()=>tr("foulSub",tr(why),name.toUpperCase());
+}
+function winRound(w,reason){
+  G.score[w]++;G.timer=0;G.shake=false;
+  const wn=G.F[w].def.name;
+  if(G.score[w]>=2){finishMatch(w);return;}
+  G.phase="round";G.msg=reason||(()=>tr("pin"));G.msgCol="#efe6d6";G.sub=()=>tr("roundFor",wn.toUpperCase());
+}
+function finishMatch(w){
+  G.phase="match";G.winner=w;
+  const pvp=G.mode==="pvp",wn=G.F[w].def.name.toUpperCase();
+  const tour=G.tour,stage=G.tour?G.tour.stage+1:0;
+  buzz([40,60,40]);
+  G.sub=()=>(isTouch()?tr("tapCont"):tr("spaceCont"))+": "+G.next();
+  if(pvp){G.msg=()=>tr("winsMatch",wn);G.msgCol=w===0?"#f0a93b":"#4fb7ab";G.next=()=>tr("rematch");SFX.cheer();return;}
+  if(w===0){
+    SFX.cheer();G.msgCol="#f0a93b";
+    if(tour&&tour.stage<2){G.msg=()=>tr("stageDone",stage);G.next=()=>tr("nextOpp");}
+    else if(tour){G.msg=()=>tr("tourWin");G.next=()=>tr("newTour");}
+    else{G.msg=()=>tr("win");G.next=()=>tr("rematch");}
+  }else{
+    G.msgCol="#e0574a";
+    G.msg=()=>tour?tr("tourEnd"):tr("lose");G.next=()=>tour?tr("newTour"):tr("rematch");
+  }
+}
+function afterMatch(){
+  if(!G||G.phase!=="match"||G.timer<.8)return;
+  if(G.tour&&G.winner===0&&G.tour.stage<2){
+    const t=G.tour;t.stage++;beginMatch(G.F[0].def,t.opps[t.stage],["amator","zawodnik","mistrz"][t.stage],t);return;
+  }
+  if(G.mode==="cpu"&&!G.tour){beginMatch(G.F[0].def,G.F[1].def,G.diffKey,null);return;}
+  if(G.mode==="pvp"){beginMatch(G.F[0].def,G.F[1].def,"zawodnik",null);return;}
+  newGame();
+}
+
+function press(who,k){
+  if(!G||G.phase!=="fight")return;
+  const fs=G.F[who],eff=fs.gassed>0?.25:1;
+  fs.m[k]=Math.min(1,fs.m[k]+.08*eff);
+  fs.stam=Math.max(0,fs.stam-.022/fs.def.stamina);
+  if(fs.stam<=0&&!fs.gassed){fs.gassed=1.5;SFX.gassed();}
+  fs.flash[k]=.1;
+  SFX.tap(METERS.findIndex(m=>m.k===k),who,G.ai&&who===1);
+}
+function step(fs,dt){
+  for(const m of METERS){const v=fs.m[m.k];fs.m[m.k]=Math.max(0,v-(.08+.35*v)*dt);}
+  if(fs.gassed>0){fs.gassed-=dt;if(fs.gassed<=0){fs.gassed=0;fs.stam=Math.max(fs.stam,.3);}}
+  else fs.stam=Math.min(1,fs.stam+.11*fs.def.stamina*dt);
+  const m=fs.m;
+  if(m.side>.85&&m.back<.25)fs.slip+=dt;else fs.slip=Math.max(0,fs.slip-dt*2);
+  const sc={hook:(m.cup+m.side)/2,toproll:(m.riser+m.back)/2,press:m.side*.6+m.back*.4-.25*(m.cup+m.riser)};
+  let best="none",bv=.3;for(const s in sc)if(sc[s]>bv){bv=sc[s];best=s;}
+  fs.style=best;
+}
+function force(a,b){
+  const s=a.def.stats,m=a.m,gb=GRIPS[a.grip].bonus;
+  const w={side:1,back:.9,cup:.7,riser:.7};
+  let f=0;for(const k in w)f+=m[k]*s[k]*w[k]*(gb[k]||1);
+  if(a.style!=="none"&&BEATS[a.style]===b.style)f*=1.2;
+  const wa=m.cup*s.cup+m.riser*s.riser,wb=b.m.cup*b.def.stats.cup+b.m.riser*b.def.stats.riser;
+  a.wrist=wa-wb>.15?"win":wb-wa>.15?"lose":"even";
+  if(a.wrist==="lose")f*=.85;
+  if(a.gassed>0)f*=.7;
+  return f;
+}
+function aiReplan(){
+  const a=G.ai;a.replan=1.2+Math.random()*.8;a.roll=Math.random();
+  const ps=G.F[0].style;
+  if(ps!=="none"&&Math.random()<G.diff.counter)a.plan=COUNTER[ps];
+  else a.plan=G.F[1].def.pref||["hook","toproll","press"][Math.floor(Math.random()*3)];
+}
+function aiStep(dt){
+  const a=G.ai,o=G.F[1],d=G.diff;
+  a.replan-=dt;if(a.replan<=0)aiReplan();
+  if(!a.throttle&&o.stam<.22&&a.roll<d.smart)a.throttle=true;
+  if(a.throttle&&o.stam>.6)a.throttle=false;
+  const rate=a.throttle?4.5*o.def.stamina**2:d.rate*(.8+.35*Math.sin(G.timer*1.7+a.off));
+  a.acc+=rate*dt;
+  while(a.acc>=1){
+    a.acc-=1;const seq=PLANS[a.plan];
+    let k=Math.random()<.8?seq[Math.floor(Math.random()*seq.length)]:METERS[Math.floor(Math.random()*4)].k;
+    if(o.slip>.3&&a.roll<d.smart)k="back";
+    press(1,k);
+  }
+}
+function update(dt){
+  if(!G)return;
+  G.timer+=dt;G.goT=Math.max(0,G.goT-dt);
+  for(const fs of G.F)for(const k in fs.flash)fs.flash[k]=Math.max(0,fs.flash[k]-dt);
+  if(G.phase==="grip"){
+    if(G.ai&&!G.F[1].gripChosen&&G.timer>.5){
+      const pg=G.F[0].gripChosen?G.F[0].grip:null;
+      let gk=PLAN_GRIP[G.ai.plan];
+      if(pg&&Math.random()<G.diff.counter)gk=PLAN_GRIP[COUNTER[{high:"toproll",mid:"press",deep:"hook"}[pg]]];
+      chooseGrip(1,GRIP_ORDER.indexOf(gk));
+    }
+    if((G.F[0].gripChosen&&G.F[1].gripChosen&&G.timer>.8)||G.timer>4)toReady();
+  }else if(G.phase==="ready"){
+    if(G.cpuFalse>=0&&G.timer>=G.cpuFalse){foul(1,"falstart");return;}
+    if(G.timer>=G.readyDur){G.phase="fight";G.timer=0;G.goT=.6;SFX.go();}
+  }else if(G.phase==="fight"){
+    step(G.F[0],dt);step(G.F[1],dt);if(G.ai)aiStep(dt);
+    for(let i=0;i<2;i++)if(G.F[i].slip>.9){foul(i,"elbowOff");return;}
+    const pf=force(G.F[0],G.F[1]),of=force(G.F[1],G.F[0]);G.F[0].force=pf;G.F[1].force=of;
+    G.shake=pf>1.1&&of>1.1&&Math.abs(pf-of)<.25;
+    G.pos+=(pf-of)*30*dt;
+    if(Math.abs(G.pos)>=100){G.pos=Math.sign(G.pos)*100;SFX.thud();buzz(50);winRound(G.pos>0?0:1);}
+  }else if(G.phase==="round"&&G.timer>2.4){G.round++;startRound();}
+  else if(G.phase==="foul"&&G.timer>2){regrip();}
+}
+
+/* ---------- scene (izometria) ---------- */
+const cv=$("#scene"),ctx=cv.getContext("2d");ctx.imageSmoothingEnabled=false;
+const OX=160,OY=135;
+// świat: x = oś pinowania, y = oś między zawodnikami (+y bliżej kamery = gracz), z = w górę
+function P(x,y,z){return [OX+(x-y),OY+(x+y)/2-z*.9];}
+function poly(g,pts,c){
+  g.fillStyle=c;let y0=Infinity,y1=-Infinity;
+  for(const p of pts){if(p[1]<y0)y0=p[1];if(p[1]>y1)y1=p[1];}
+  const n=pts.length;
+  for(let y=Math.ceil(y0);y<=Math.floor(y1);y++){
+    let xl=Infinity,xr=-Infinity;
+    for(let i=0;i<n;i++){const a=pts[i],b=pts[(i+1)%n];
+      if((a[1]<=y&&b[1]>=y)||(b[1]<=y&&a[1]>=y)){
+        if(a[1]===b[1]){xl=Math.min(xl,a[0],b[0]);xr=Math.max(xr,a[0],b[0]);}
+        else{const x=a[0]+(y-a[1])*(b[0]-a[0])/(b[1]-a[1]);if(x<xl)xl=x;if(x>xr)xr=x;}}}
+    if(xl<=xr){const l=Math.round(xl);g.fillRect(l,y,Math.round(xr)-l+1,1);}
+  }
+}
+function quad(g,a,b,c,d,col){poly(g,[P(...a),P(...b),P(...c),P(...d)],col);}
+function box(g,x0,x1,y0,y1,z0,z1,top,front,side){
+  const h=[P(x0,y0,z1),P(x1,y0,z1),P(x1,y0,z0),P(x1,y1,z0),P(x0,y1,z0),P(x0,y1,z1)];
+  for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]])poly(g,h.map(p=>[p[0]+dx,p[1]+dy]),OUT);
+  quad(g,[x0,y1,z1],[x1,y1,z1],[x1,y1,z0],[x0,y1,z0],front);
+  quad(g,[x1,y0,z1],[x1,y1,z1],[x1,y1,z0],[x1,y0,z0],side);
+  quad(g,[x0,y0,z1],[x1,y0,z1],[x1,y1,z1],[x0,y1,z1],top);
+}
+function limb3(g,a,b,r,c){const p=P(...a),q=P(...b);limb(g,p[0],p[1],q[0],q[1],r,c);}
+function strainOf(fs){return fs.m.side+fs.m.back+fs.m.cup+fs.m.riser>1.4;}
+
+function drawRoom(g){
+  px(g,0,0,320,180,"#241e2c");
+  quad(g,[-90,-90,0],[-90,90,0],[-90,90,150],[-90,-90,150],"#2e2536");
+  quad(g,[-90,-90,0],[-90,90,0],[-90,90,28],[-90,-90,28],"#251e2d");
+  quad(g,[-90,-90,0],[90,-90,0],[90,-90,150],[-90,-90,150],"#2a2232");
+  quad(g,[-90,-90,0],[90,-90,0],[90,-90,28],[-90,-90,28],"#221b29");
+  const c0=P(-90,-90,0),c1=P(-90,-90,150);brush(g,c0[0],c0[1],c1[0],c1[1],0,"#3b3046");
+  // plakat zawodów na prawej ścianie
+  quad(g,[-10,-90,60],[50,-90,60],[50,-90,100],[-10,-90,100],"#3a2c47");
+  quad(g,[-10,-90,60],[50,-90,60],[50,-90,64],[-10,-90,64],"#f0a93b");
+  quad(g,[0,-90,80],[40,-90,80],[40,-90,83],[0,-90,83],"#efe6d6");
+  quad(g,[6,-90,72],[34,-90,72],[34,-90,74],[6,-90,74],"#9d93a8");
+  // podłoga
+  for(let i=-90;i<90;i+=20)for(let j=-90;j<90;j+=20)
+    quad(g,[i,j,0],[i+20,j,0],[i+20,j+20,0],[i,j+20,0],((i+j)/20)&1?"#2b2533":"#262030");
+  quad(g,[-56,-28,0],[56,-28,0],[56,28,0],[-56,28,0],"rgba(10,8,14,.45)");
+}
+function drawTable(g){
+  for(const[x,y]of[[-46,-18],[42,-18],[-46,14],[42,14]])box(g,x,x+4,y,y+4,0,36,"#3a4350","#3a4350","#2c333d");
+  box(g,-50,50,-22,22,36,40,"#7d8b99","#5a6775","#4c5866");
+  quad(g,[-9,9,40],[1,9,40],[1,19,40],[-9,19,40],"#1c1a22");     // łokieć gracza
+  quad(g,[-1,-19,40],[9,-19,40],[9,-9,40],[-1,-9,40],"#1c1a22");  // łokieć rywala
+  quad(g,[30,-8,40],[44,-8,40],[44,8,40],[30,8,40],"#f0a93b");    // tu dociskasz rywala
+  quad(g,[-44,-8,40],[-30,-8,40],[-30,8,40],[-44,8,40],"#4fb7ab"); // tu rywal dociska Ciebie
+}
+function drawPeg(g,p){box(g,p[0]-1,p[0]+1,p[1]-1,p[1]+1,40,54,"#c9d1d9","#aab3bd","#8b95a0");}
+
+// side: +1 gracz (bliżej kamery, widziany od tyłu), -1 rywal (przodem)
+function geom(fs,side){const b=fs.def.look.build;return {b,hw:Math.round(12*b),yc:side*40,lean:G.pos*.06};}
+function armPts(fs,side){
+  const {hw,yc,lean}=geom(fs,side);
+  const rs=[-side*(hw+1)+lean,yc,69],ls=[side*(hw+1)+lean,yc,69],peg=[side*30,side*20,50];
+  return {rs,ls,peg,elbow:[-side*4,side*14,43],freeEl:[(ls[0]+peg[0])/2+side*6,(ls[1]+peg[1])/2,52]};
+}
+function upperArm(g,L,b,s,e){arm(g,s,e,4*b,3.5*b,[[0,6*b],[.45,5*b]],L);}
+function foreArm(g,L,b,e,h){arm(g,e,h,4*b,3*b,[[.28,5*b]],L);}
+function drawTorso(g,fs,side){
+  const L=fs.def.look,{hw,yc,lean}=geom(fs,side),x=lean,pants=L.pants||"#2c2935";
+  const s0=side>0?yc-8:yc-4,s1=side>0?yc+4:yc+8;
+  box(g,-9+x,-2+x,s0,s1,0,4,"#2a2630","#17141c","#100e14");
+  box(g,2+x,9+x,s0,s1,0,4,"#2a2630","#17141c","#100e14");
+  box(g,-9+x,-2+x,yc-4,yc+4,4,26,pants,pants,dark(pants,.3));
+  box(g,2+x,9+x,yc-4,yc+4,4,26,pants,pants,dark(pants,.3));
+  const ww=hw*.72;
+  box(g,-ww+x,ww+x,yc-5,yc+5,24,28,"#1b1820","#1b1820","#121016");
+  box(g,-ww+x,ww+x,yc-5,yc+5,28,50,L.shirt,L.shirt,L.shirtDk);
+  box(g,-hw+x,hw+x,yc-6,yc+6,48,70,lite(L.shirt,.15),L.shirt,L.shirtDk);
+  quad(g,[-hw+x,yc+6,66],[hw+x,yc+6,66],[hw+x,yc+6,70],[-hw+x,yc+6,70],lite(L.shirt,.15));
+  box(g,-4+x,4+x,yc-3,yc+3,70,74,L.skin,L.skin,L.skinDk);
+}
+function drawHead3(g,fs,side,t){
+  const L=fs.def.look,{yc,lean}=geom(fs,side);
+  const jit=G.shake&&Math.random()<.5?1:0;
+  const p=P(lean,yc,86),cx=Math.round(p[0]),cy=Math.round(p[1])+jit;
+  px(g,cx-4,cy+6,9,6,OUT);px(g,cx-3,cy+6,7,6,L.skinDk);
+  drawFace(g,L,cx,cy,side<0,strainOf(fs)||fs.gassed>0);
+  if(fs.stam<.3){const dy=(t*14+(side>0?5:0))%8;px(g,cx+side*-12,cy-3+dy,2,3,"#8fd0ff");}
+}
+
+// splecione dłonie: dwie pięści, palce każdego owinięte na grzbiecie dłoni rywala, kciuki na górze
+function drawGrip(g,C,eA,eB,pL,oL){
+  const c=P(...C),pa=P(...eA),pb=P(...eB);
+  const unit=q=>{const dx=q[0]-c[0],dy=q[1]-c[1],l=Math.hypot(dx,dy)||1;return [dx/l,dy/l];};
+  const dA=unit(pa),dB=unit(pb);
+  const fist=(d,L)=>{const x=c[0]+d[0]*2.5,y=c[1]+d[1]*2.5;disc(g,x,y,7,OUT);disc(g,x,y,6,L.skinDk);disc(g,x-1,y-1,5,L.skin);};
+  fist(dB,oL);fist(dA,pL);
+  const fingers=(d,L)=>{
+    const n=[-d[1],d[0]];
+    for(const q of[-1.5,-.5,.5,1.5]){
+      const x=Math.round(c[0]+d[0]*5+n[0]*q*2.6),y=Math.round(c[1]+d[1]*5+n[1]*q*2.6);
+      px(g,x-1,y-1,4,4,OUT);px(g,x,y,2,2,L.skin);px(g,x,y,1,1,lite(L.skin,.35));
+    }
+  };
+  fingers(dB,pL);fingers(dA,oL);
+  const t0=[c[0]-4,c[1]-6],t1=[c[0]+3,c[1]-7];
+  brush(g,t0[0],t0[1],t1[0],t1[1],2,OUT);brush(g,t0[0],t0[1],t1[0],t1[1],1,pL.skin);
+  brush(g,t0[0]+1,t0[1]-2,t1[0]+1,t1[1]-2,1,OUT);brush(g,t0[0]+1,t0[1]-2,t1[0],t1[1]-2,0,oL.skin);
+}
+
+function render(t){
+  const g=ctx;g.save();
+  if(G&&G.shake)g.translate(Math.floor(Math.random()*3)-1,Math.floor(Math.random()*2));
+  drawRoom(g);
+  if(!G){drawTable(g);g.restore();return;}
+  const F0=G.F[0],F1=G.F[1],A=armPts(F0,1),B=armPts(F1,-1);
+  const pL=F0.def.look,oL=F1.def.look,pb=pL.build,ob=oL.build;
+  // od najdalszego do najbliższego
+  drawTorso(g,F1,-1);drawHead3(g,F1,-1,t);
+  drawTable(g);drawPeg(g,B.peg);drawPeg(g,A.peg);
+  upperArm(g,oL,ob,B.ls,B.freeEl);foreArm(g,oL,ob,B.freeEl,B.peg);
+  upperArm(g,oL,ob,B.rs,B.elbow);
+  const th=G.pos/100*1.4,C=[30*Math.sin(th),0,42+30*Math.cos(th)];
+  foreArm(g,oL,ob,B.elbow,C);
+  foreArm(g,pL,pb,A.elbow,C);
+  drawGrip(g,C,A.elbow,B.elbow,pL,oL);
+  upperArm(g,pL,pb,A.rs,A.elbow);
+  upperArm(g,pL,pb,A.ls,A.freeEl);foreArm(g,pL,pb,A.freeEl,A.peg);
+  drawTorso(g,F0,1);drawHead3(g,F0,1,t);
+
+  // nazwy, rundy, faule, chwyty
+  const cols=["#f0a93b","#4fb7ab"];
+  ptext(g,F0.def.name.toUpperCase(),6,10,8,cols[0],'"Silkscreen"',"left");
+  ptext(g,F1.def.name.toUpperCase(),314,10,8,cols[1],'"Silkscreen"',"right");
+  for(let i=0;i<2;i++){
+    px(g,6+i*8,18,6,6,OUT);px(g,7+i*8,19,4,4,G.score[0]>i?cols[0]:"#3a3245");
+    px(g,308-i*8,18,6,6,OUT);px(g,309-i*8,19,4,4,G.score[1]>i?cols[1]:"#3a3245");
+    if(G.fouls[0]>i){px(g,6+i*8,27,6,3,"#e0574a");}
+    if(G.fouls[1]>i){px(g,308-i*8,27,6,3,"#e0574a");}
+  }
+  if(G.phase!=="grip"||F0.gripChosen)ptext(g,tr("gripOf",gripName(F0.grip)),6,36,8,"#9d93a8",'"Silkscreen"',"left");
+  if(G.phase!=="grip"||F1.gripChosen)ptext(g,tr("gripOf",gripName(F1.grip)),314,36,8,"#9d93a8",'"Silkscreen"',"right");
+
+  let msg="",sub="",col="#efe6d6";
+  const touch=isTouch();
+  if(touch)for(let i=0;i<2;i++){
+    const fs=G.F[i],x=i?270:6,w=44;
+    px(g,x,44,w+2,5,OUT);px(g,x+1,45,Math.round(w*fs.stam),3,fs.gassed>0?"#e0574a":"#efe6d6");
+    ptext(g,fs.gassed>0?tr("gassed"):styleName(fs.style),i?314:6,56,8,cols[i],'"Silkscreen"',i?"right":"left");
+  }
+  if(G.phase==="grip"){
+    msg=tr("gripMsg");
+    sub=touch?tr("gripSubTouch"):G.mode==="pvp"?tr("gripSubPvp"):tr("gripSubSolo");
+  }
+  else if(G.phase==="ready")msg="READY…";
+  else if(G.phase==="fight"&&G.goT>0)msg="GO!";
+  else if(G.phase==="round"||G.phase==="foul"||G.phase==="match"){
+    msg=G.msg?G.msg():"";sub=G.sub?G.sub():"";col=G.msgCol;
+  }
+  if(!msg&&G.tour)ptext(g,tr("tourStage",G.tour.stage+1),160,10,8,"#9d93a8",'"Silkscreen"');
+  if(msg){
+    g.font='16px "Pixelify Sans"';const w=Math.max(150,g.measureText(msg).width+24);
+    px(g,160-w/2,2,w,22,"rgba(18,15,22,.88)");ptext(g,msg,160,13,16,col);
+  }
+  if(sub){
+    g.font='8px "Silkscreen"';const w=Math.min(316,g.measureText(sub).width+16);
+    px(g,160-w/2,163,w,15,"rgba(18,15,22,.88)");ptext(g,sub,160,170,8,"#c9bfd4",'"Silkscreen"');
+  }
+  g.restore();
+}
+
+/* ---------- sterowanie i pętla ---------- */
+function handleKey(k){
+  if(!G)return false;
+  if(k==="escape"){toSelect();return true;}
+  if(k==="m"){toggleMute();return true;}
+  if(k===" "||k==="enter"){if(G.phase==="match")afterMatch();return true;}
+  for(let who=0;who<2;who++){
+    if(who===1&&G.mode!=="pvp")continue;
+    const idx=KEYMAP[who].indexOf(k);if(idx<0)continue;
+    if(G.phase==="grip"){if(idx<3)chooseGrip(who,idx);}
+    else if(G.phase==="ready")foul(who,"falstart");
+    else if(G.phase==="fight")press(who,METERS[idx].k);
+    return true;
+  }
+  return false;
+}
+addEventListener("keydown",e=>{
+  if($("#fight").hidden)return;
+  ensureAudio();
+  if(e.repeat||e.ctrlKey||e.metaKey||e.altKey)return;
+  const k=e.key.toLowerCase();
+  if(KEYMAP[0].includes(k)||KEYMAP[1].includes(k))setTouch(false);
+  if(handleKey(k))e.preventDefault();
+});
+cv.addEventListener("pointerdown",e=>{ensureAudio();if(e.pointerType==="touch")setTouch(true);if(G&&G.phase==="match")afterMatch();});
+
+/* ---------- wykrywanie urządzenia ---------- */
+// Telefon/tablet: ekran dotykowy bez precyzyjnego wskaźnika. Klawiatura lub dotyk w trakcie gry przełącza tryb sam.
+let touchMode=false,ctrlManual=false;
+function isTouch(){return touchMode;}
+function setTouch(on,manual){
+  if(ctrlManual&&!manual)return;
+  if(manual)ctrlManual=true;
+  if(on===touchMode&&document.body.classList.contains(on?"touch":"kb"))return;
+  touchMode=on;
+  document.body.classList.toggle("touch",on);document.body.classList.toggle("kb",!on);
+  $("#ctrl").textContent=on?tr("ctrlTouch"):tr("ctrlKb");
+  PADS.forEach(p=>p.cache=[]);
+  refreshSelect();
+}
+function detectTouch(){
+  const coarse=matchMedia("(pointer:coarse)").matches,fine=matchMedia("(pointer:fine)").matches;
+  return coarse&&!fine||(navigator.maxTouchPoints>0&&!fine);
+}
+$("#ctrl").addEventListener("click",()=>setTouch(!touchMode,true));
+setTouch(detectTouch());
+
+let last=performance.now();
+function loop(now){
+  const dt=Math.min(.05,(now-last)/1000);last=now;
+  update(dt);render(now/1000);if(G)hud();
+  requestAnimationFrame(loop);
+}
+buildSelect();
+(document.fonts?document.fonts.load('8px "Silkscreen"').then(()=>document.fonts.load('16px "Pixelify Sans"')):Promise.resolve())
+  .catch(()=>{}).finally(()=>{FIGHTERS.forEach((f,i)=>{const c=document.querySelector(`#pick-${i} canvas`);if(c)drawPortrait(c,f);});});
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
